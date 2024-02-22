@@ -23,7 +23,7 @@ How to use the tool?
 5. Similarly, the user may correct the melody corresponding to the low confidence frames in the entire audio and validate through auditory feedback.
 6. After this, the user clicks on the 'Retrain Model' button to adapt the model to these corrections.
 7. The retrained model predicts an updated estimated melody, and the user can visualize it as in STEP 3. Also, the confidence values at each time frame are also updated.
-8. The points from 1 to 7 are repeated until the user can visually observe that very few melody estimations are wrong.
+8. The points from 1 to 7 are repeated until the user can visually observe that very few melody estimations (less than ~2%) are wrong.
 9. To improve the melody precision further, the user always has the option of correcting the remaining melody manually.
 - **STEP 5:** Once the user is satisfied with the corrections, the annotations can be downloaded by clicking on the 'Download CSV' button.
 
