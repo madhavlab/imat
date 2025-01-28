@@ -1,5 +1,4 @@
-# 2024_imat
-## IMAT - Interactive Melody Annotation Tool
+# IMAT - Interactive Melody Annotation Tool
 Tool for correcting melody from polyphonic audio
 
 How to use the tool?
