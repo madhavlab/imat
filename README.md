@@ -1,6 +1,10 @@
 # IMAT - Interactive Melody Annotation Tool
-Tool for correcting melody from polyphonic audio
 
+## Overview
+IMAT is a tool designed to correct singing melodies obtained from machine-learning melody estimation algorithms. 
+
+
+## Usage
 How to use the tool?
 
 **Prerequisites**
@@ -11,7 +15,7 @@ How to use the tool?
       python3 requirement.txt
   ```
 
-**Tool Manual**
+## Tool Manual
 - On the terminal, activate the new environment and run the Python script - 'app.py'.
 - After executing 'app.py', copy the link that appears on the terminal and open it on the browser, or press Ctrl+link to open it directly on the browser. The link should look like this - <ins>Running on</ins> http://127.0.0.1:3000
   
@@ -37,7 +41,7 @@ If you use IMAT for annotating the polyphonic audios, please cite us
 ```
   *citation*
 ```
-Also, if you use melody annotations of a subset of FMA-small dataset, please cite the dataset 
+Also, if you use melody annotations of a subset of the FMA-small dataset, please cite the dataset 
 ```
   *citation*
 ```
