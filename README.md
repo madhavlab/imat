@@ -22,8 +22,13 @@ How to use the tool?
 5. Repeat the process from 1-4 until the user is satisfied by annotating **only** the low-confident frames of the entire audio.
 6. After this, the user clicks on the 'Retrain Model' button to adapt the model to these corrections. This is referred to as the *s=1* iteration of Adaptive Annotation.
 7. The retrained model predicts an updated estimated melody, and the user can visualize it as in STEP 3. Also, the confidence values at each time frame are also updated.
-9. The points from 1 to 7 are repeated for *s* iterations of Adaptive Annotation to reach an overall accuracy of at least 95%.
-10. To improve the annotation further, the user always has the option of correcting the remaining melody manually.
+9. The points from 1 to 7 are repeated for *s* iterations of Adaptive Annotation until an overall accuracy of at least 95%.
+10. To further improve the overall accuracy, the user always has the option of correcting the remaining melody manually.
 - **STEP 5:** Once the user is satisfied with the corrections, the annotations can be downloaded by clicking on the 'Download CSV' button.
 
 **Follow the same procedure to annotate any polyphonic audio.**
+
+
+## Contact
+For any questions or feedback, please contact:
+- Kavya Ranjan Saxena (kavyars@iitk.ac.in)
