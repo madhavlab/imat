@@ -5,7 +5,7 @@ IMAT is a tool designed to correct singing melodies obtained from machine-learni
 
 
 ## Usage
-How to use the tool?
+How to setup the tool?
 
 **Prerequisites**
 - Clone this repository on your local system and setup environment
