@@ -3,14 +3,15 @@ Tool for correcting melody from polyphonic audio
 
 How to use the tool?
 
-**Libraries**
-- Download the entire repository on your local system.
+**Prerequisites**
+- Clone this repository on your local system and setup environment
   ```
-    git clone 
+      git clone https://github.com/madhavlab/imat_taslp.git
+      cd imat_taslp
+      python3 requirement.txt
   ```
-- Create a new environment and run the requirement.txt file to install the required libraries in the new environment.
 
-**Process**
+**Tool Manual**
 - On the terminal, activate the new environment and run the Python script - 'app.py'.
 - After executing 'app.py', copy the link that appears on the terminal and open it on the browser, or press Ctrl+link to open it directly on the browser. The link should look like this - <ins>Running on</ins> http://127.0.0.1:3000
   
@@ -31,6 +32,15 @@ How to use the tool?
 
 **Follow the same procedure to annotate any polyphonic audio.**
 
+## Citation
+If you use IMAT for annotating the polyphonic audios, please cite us
+```
+  *citation*
+```
+Also, if you use melody annotations of a subset of FMA-small dataset, please cite the dataset 
+```
+  *citation*
+```
 
 ## Contact
 For any questions or feedback, please contact:
