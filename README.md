@@ -7,9 +7,9 @@ How to use the tool?
 - Download the entire folder on your local system.
 - Create a new environment and run the requirement.txt file to install the required libraries in the new environment.
 
-**Run**
-- On the terminal, activate the new environment and run 'app.py'.
-- After executing 'app.py', copy the link that appears on the terminal and open it on the browser, or press Ctrl+link to open it directly on the browser.
+**Process**
+- On the terminal, activate the new environment and run the Python script - 'app.py'.
+- After executing 'app.py', copy the link that appears on the terminal and open it on the browser, or press Ctrl+link to open it directly on the browser. The link should look like this - <ins>Running on http://127.0.0.1:3000</ins>
   
 - **STEP 1:** Click on 'Upload audio', and browse through your system to annotate the audio you wish. Please make sure you upload a '.wav' audio file.
 - **STEP 2:** Once the audio is uploaded, click on the 'Show Spectrogram' button to visualize the spectrogram.
