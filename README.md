@@ -4,7 +4,10 @@ Tool for correcting melody from polyphonic audio
 How to use the tool?
 
 **Libraries**
-- Download the entire folder on your local system.
+- Download the entire repository on your local system.
+  ```
+    git clone 
+  ```
 - Create a new environment and run the requirement.txt file to install the required libraries in the new environment.
 
 **Process**
