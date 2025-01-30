@@ -50,5 +50,3 @@ Also, if you use melody annotations of a subset of the FMA-small dataset, please
 For any questions or feedback, please contact:
 - Kavya Ranjan Saxena (kavyars@iitk.ac.in)
 
-## Links
-- Paper[<img src = "https://upload.wikimedia.org/wikipedia/commons/e/eb/Paper_icon.svg">](arXiv preprint arXiv:2210.12532)
