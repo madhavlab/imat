@@ -51,4 +51,4 @@ For any questions or feedback, please contact:
 - Kavya Ranjan Saxena (kavyars@iitk.ac.in)
 
 ## Links
-- [![Paper](https://upload.wikimedia.org/wikipedia/commons/e/eb/Paper_icon.svg)]
+- Paper![(https://upload.wikimedia.org/wikipedia/commons/e/eb/Paper_icon.svg)]
