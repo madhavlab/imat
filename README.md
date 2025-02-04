@@ -41,10 +41,13 @@ If you use IMAT for annotating the polyphonic audios, please cite us
 ```
   *citation*
 ```
-Also, if you use melody annotations of a subset of the FMA-small dataset, please cite the dataset 
-```
-  *citation*
-```
+
+## Annotated Dataset
+The **FMA-small-subset** folder consists of three subfolders - _**audio**_, _**praat_pitch**_  and _**imat_annotated_pitch**_.
+- **audio**: Consists of 50 .wav audio files, each of 30 seconds duration.
+- **praat_pitch**: Contains the corresponding ground truth .csv pitch files obtained from PRAAT on the vocal track of each audio file (separated after applying demucs).
+- **imat_annotated_pitch**: Consists of the corresponding melody .csv pitch files annoated by IMAT.
+  
 
 ## Contact
 For any questions or feedback, please contact:
