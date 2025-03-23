@@ -1,0 +1,2 @@
+model_checkpoint_path: "conf-weights-6570"
+all_model_checkpoint_paths: "conf-weights-6570"
