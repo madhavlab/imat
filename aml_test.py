@@ -12,6 +12,9 @@ from sklearn.preprocessing import OneHotEncoder
 import mir_eval
 from glob import glob
 
+## testing the performance of meta-learning model 
+
+
 filepath_pre = '../weights/meta_model/pre/meta_weights-{epoch:02d}'
 filepath_conf = '../weights/meta_model/conf/meta_weights-{epoch:02d}'
 
