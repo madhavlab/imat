@@ -28,14 +28,46 @@ warnings.filterwarnings("ignore")
 app = Flask(__name__)
 app.config["CACHE_TYPE"] = "null"
 
-wavfileDir = 'UploadedWavFile'
-chunkwavfileDir = './static/ChunkedWavFile'
-resynthwavfileDir = './static/ResynthWavFile'
-groundtruthDir = 'PredictedFile'
-supportindxDir = 'supportindxfile'
-filename = None
 
+# Directory configuration
+wavfileDir = './AnnotatedData/UploadedWavFile'
+chunkwavfileDir = './dynamic/ChunkedWavFile'
+resynthwavfileDir = './dynamic/ResynthWavFile'
+groundtruthDir = './AnnotatedData/AnnotatedPitch'
+
+updatedWeightsDirPre = './models/updated_weights/pre'
+updatedWeightsDirConf = './models/updated_weights/conf'
+
+# Create directories if they don't exist
+def ensure_directories_exist():
+    directories = [
+        wavfileDir,
+        chunkwavfileDir,
+        resynthwavfileDir, 
+        groundtruthDir,
+        updatedWeightsDirPre,
+        updatedWeightsDirConf
+    ]
+    
+    for directory in directories:
+        if not os.path.exists(directory):
+            os.makedirs(directory)
+            print(f"Created directory: {directory}")
+
+# Create directories when app starts
+ensure_directories_exist()
+
+# Initialize global variables
 fileIndx = 0
+
+# Load pre-trained models
+model = melody_extraction()
+model.build_graph([500, 513, 1])
+
+model_conf = ConfidenceModel(model)
+model_conf.build_graph([500, 513, 1])
+model.load_weights('./models/pre/weights')
+model_conf.load_weights('./models/conf/weights')
 
 @app.route('/')
 def index():
