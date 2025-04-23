@@ -1,27 +1,22 @@
 import json
-import re
-import shutil
-from scipy import signal
-import numpy as np
-import math
-from flask import Flask, render_template, request, make_response, send_from_directory, jsonify, send_file
 import os
-import librosa
+import csv
 import numpy as np
-import soundfile as sf
-from pydub import AudioSegment
-import matplotlib.pyplot as plt
+import librosa
 from scipy.io.wavfile import write
 import mir_eval
-import csv
-from tcp_interface import *
-from aml_test import *
-import warnings
-import socket
+from flask import Flask, render_template, request, make_response, send_from_directory, jsonify
 
-## weights to be used finally!!
-# model.load_weights('./models/adaptive_weights/weights/meta_model/pre/meta_weights-500')
-# model_conf.load_weights('./models/conf/conf-weights-6000')
+# Import from utility modules
+from utils import melody_extraction, ConfidenceModel
+from melody_processing import (
+    get_spectrogram_json, get_melody_json, 
+    conf_values, pitch2wav, aml
+)
+
+# Initialize Flask app
+app = Flask(__name__)
+app.config["CACHE_TYPE"] = "null"
 
 warnings.filterwarnings("ignore")
 
