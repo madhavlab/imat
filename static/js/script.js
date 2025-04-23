@@ -813,3 +813,100 @@ function plotSpectrogram(data) {
         })   
 
 }
+
+
+// ####################################################################################
+// Upload an audio and display the waveform
+
+// Store references to event listeners for cleanup
+const eventListenerReferences = {
+    wavesurfer: [],
+    regions: [],
+    ui: []
+};
+
+// Initiates the audio file upload process
+
+function uploadAudio() {
+    const fileInput = document.getElementById('fileInput');
+    fileInput.click();
+    fileInput.onchange = handleFileSelection;
+}
+
+
+// Handles the file selection from the input
+
+function handleFileSelection() {
+    const fileInput = document.getElementById('fileInput');
+    selectedFile = fileInput.files[0];
+    console.log('File:', selectedFile);
+    
+    // Validate the file before processing
+    validateAudioFile(selectedFile);
+}
+
+
+// Validates the audio file before processing
+
+function validateAudioFile(file) {
+    const audioElement = new Audio();
+    audioElement.src = URL.createObjectURL(file);
+    
+    audioElement.addEventListener('loadedmetadata', function() {
+        const duration = audioElement.duration;
+        const MAX_DURATION = 30; // seconds
+        
+        if (duration > MAX_DURATION) {
+            alert(`File duration exceeds ${MAX_DURATION} seconds. Please select a shorter file.`);
+        } else {
+            // Clean up existing resources before processing new file
+            cleanupExistingResources();
+            
+            // Process the audio file
+            processAudioFile(file);
+        }
+    });
+    
+    // Error handling for audio loading
+    audioElement.addEventListener('error', function() {
+        alert('Error loading audio file. Please try another file.');
+    });
+    
+    audioElement.load();
+}
+
+// Processes a valid audio file
+function processAudioFile(file) {
+    // Load the selected file into wavesurfer
+    wavesurfer.loadBlob(file);
+    
+    // Set up event handlers
+    setupWavesurferEvents();
+    setupRegionsEvents();
+}
+
+
+// Sets up WaveSurfer-related event handlers
+function setupWavesurferEvents() {
+    // Rewind to beginning when finished playing
+    const finishHandler = () => {
+        wavesurfer.setTime(0);
+    };
+    wavesurfer.on('finish', finishHandler);
+    eventListenerReferences.wavesurfer.push({ event: 'finish', handler: finishHandler });
+    
+    // Handle decoding completion
+    wavesurfer.once('decode', setupUserInterface);
+    
+    // Reset active region on waveform interaction
+    const interactionHandler = () => {
+        if (activeRegion) {
+            activeRegion.remove();
+            activeRegion = null;
+            wavesurfer.stop();
+        }
+    };
+    wavesurfer.on('interaction', interactionHandler);
+    eventListenerReferences.wavesurfer.push({ event: 'interaction', handler: interactionHandler });
+}
+
