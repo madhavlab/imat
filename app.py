@@ -17,6 +17,7 @@ import csv
 from tcp_interface import *
 from aml_test import *
 import warnings
+import socket
 
 ## weights to be used finally!!
 # model.load_weights('./models/adaptive_weights/weights/meta_model/pre/meta_weights-500')
@@ -409,6 +410,15 @@ def download():
   
   return '',204
 
+def find_free_port():
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(('', 0))  # Bind to any available port
+        return s.getsockname()[1]
 
 if __name__ == "__main__":
-  app.run(debug=True,port=11000)
+    port = find_free_port()
+    print(f"Running on port {port}")
+    app.run(debug=True, port=port)
+
+# if __name__ == "__main__":
+#   app.run(debug=True,port=11000)
