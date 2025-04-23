@@ -238,8 +238,8 @@ def calc_spec(x, fs):
     X = X[:, :win_size]
     return np.array(X)
 
-for i in range(len(audio_files)):
-    pitchfile = os.path.basename(os.path.splitext(audio_files[i])[0])
+# for i in range(len(audio_files)):
+#     pitchfile = os.path.basename(os.path.splitext(audio_files[i])[0])
 
 
 def plot_melody(fe_model,S):
