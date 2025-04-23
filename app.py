@@ -385,30 +385,35 @@ def retrain_model():
   # return '',204
 
 
-@app.route('/download',methods=['POST'])
+@app.route('/download', methods=['POST'])
 def download():
-  file = request.files['file']
-  filename = file.filename  
-  filename = filename.split('.')[0]
-  print('filename',filename)
-  
-  efv = request.form.get('freq')
-  efv = json.loads(efv)
-  for key in efv:
-    efv = efv[key]
-  
-  rows = []
-  
-  for i in range(1,len(efv)):
-    rows.append([i*0.01,efv[i]])
+    """
+    Download the extracted melody as a CSV file.
     
-  filename = filename +'.csv'
+    Returns:
+        Empty response, file is saved server-side
+    """
+    file = request.files['file']
+    filename = file.filename
+    filename = filename.split('.')[0]
     
-  with open(os.path.join(groundtruthDir,filename),'w') as file:
-    writer = csv.writer(file)
-    writer.writerows(rows)
-  
-  return '',204
+    efv = request.form.get('freq')
+    efv = json.loads(efv)
+    for key in efv:
+        efv = efv[key]
+    
+    rows = []
+    
+    for i in range(1, len(efv)):
+        rows.append([i * 0.01, efv[i]])
+    
+    filename = filename + '.csv'
+    
+    with open(os.path.join(groundtruthDir, filename), 'w') as file:
+        writer = csv.writer(file)
+        writer.writerows(rows)
+    
+    return '', 204
 
 def find_free_port():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -420,5 +425,3 @@ if __name__ == "__main__":
     print(f"Running on port {port}")
     app.run(debug=True, port=port)
 
-# if __name__ == "__main__":
-#   app.run(debug=True,port=11000)
