@@ -132,80 +132,50 @@ def get_melody_json(Sxx,filename):
 
 @app.route('/calculate_spectrogram', methods=['POST'])
 def calculate_spectrogram():
-  global fileIndx
-  # print(f'File Index...{fileIndx}')
-  file = request.files['file']
-  fileName = file.filename
-  
-  file.save(os.path.join(wavfileDir, fileName))
-  
-  data, sr = librosa.load(os.path.join(wavfileDir, fileName), sr=8000)
-  
-  Sxx,spec_data = get_spectrogram_json(data,sr)
-  # print('Melody spec',Sxx.shape)
-  # print('Orignal RPA,RCA')
-  melody_data = get_melody_json(Sxx,fileName) 
-  return make_response([spec_data,melody_data])
-
-
-@app.route('/get_conf_values',methods=['POST'])
-def get_conf_values():
-  file = request.files['file']
-  fileName = file.filename
-  
-  data,sr = librosa.load(os.path.join(wavfileDir,fileName),sr=8000)
-  
-  Sxx,_ = get_spectrogram_json(data,sr)
-  confValues = conf_values(model_conf,Sxx)
-  confValues = confValues.numpy()
-  confValues = confValues.reshape(-1)
-  return confValues.tolist()
-
-# @app.route('/get_sliced_audio_original',methods=['POST'])
-# def get_sliced_audio_original():
-#   file = request.files['file']
-#   filename = file.filename
-  
-#   y,sr = librosa.load(os.path.join(wavfileDir,filename),sr=8000)
-#   write(os.path.join(chunkwavfileDir,filename),sr,y)
-#   # Set the correct Content-Length header
-#   content_length = os.path.getsize(os.path.join(chunkwavfileDir, filename))
-  
-#   response = send_from_directory(chunkwavfileDir, filename)
-#   response.headers["Content-Length"] = content_length  
-#   return response
-
-
-# @app.route('/get_sliced_audio_resynth',methods=['POST'])
-# def get_sliced_audio_resynth():
-#   file = request.files['file']
-#   filename = file.filename
-  
-#   efv = request.form.get('array')
-#   efv = json.loads(efv)
-  
-#   for key in efv:
-#     efv = efv[key]
-  
-#   y,sr = librosa.load(os.path.join(wavfileDir,filename),sr=8000)
-#   t = np.array([0.01*i for i in range(len(efv))])
-#   t_new = np.array([i/sr for i in range(len(y))])  
-  
-#   v = np.array([1 if i!=0 else 0 for i in efv])
-#   f_new,vc = mir_eval.melody.resample_melody_series(t,efv,v,t_new,kind='nearest')
-#   y_resynth = pitch2wav(f_new,t_new)
- 
-#   write(os.path.join(resynthwavfileDir,filename),sr,y_resynth)
-  
-#   content_length = os.path.getsize(os.path.join(resynthwavfileDir, filename))
+    """
+    Calculate spectrogram and melody from uploaded audio file.
     
-#   response = send_from_directory(resynthwavfileDir, filename)
-#   response.headers["Content-Length"] = content_length
-#   return response
-   
-  
-  
-  
+    Returns:
+        JSON response with spectrogram and melody data
+    """
+    global fileIndx
+    
+    file = request.files['file']
+    fileName = file.filename
+    
+    # Save uploaded file
+    file.save(os.path.join(wavfileDir, fileName))
+    
+    # Load audio and calculate spectrogram
+    data, sr = librosa.load(os.path.join(wavfileDir, fileName), sr=8000)
+    Sxx, spec_data = get_spectrogram_json(data, sr)
+    
+    # Calculate melody
+    melody_data = get_melody_json(model, Sxx)    
+    return make_response([spec_data, melody_data])
+
+
+
+@app.route('/get_conf_values', methods=['POST'])
+def get_conf_values():
+    """
+    Get confidence values for melody prediction.
+    
+    Returns:
+        List of confidence values
+    """
+    file = request.files['file']
+    fileName = file.filename
+    
+    data, sr = librosa.load(os.path.join(wavfileDir, fileName), sr=8000)
+    
+    Sxx, _ = get_spectrogram_json(data, sr)
+    confValues = conf_values(model_conf, Sxx)
+    confValues = confValues.numpy()
+    confValues = confValues.reshape(-1)
+    return confValues.tolist()
+
+
 @app.route('/get_sliced_audio_original', methods=['POST'])
 def get_sliced_audio_original():
     """
