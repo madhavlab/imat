@@ -1,44 +1,42 @@
 import wavesurfer from '../js/wavesurfer-module.js';
 import RegionsPlugin from 'https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.esm.js'
 
+// Global variables
 const wsRegions = wavesurfer.registerPlugin(RegionsPlugin.create())
-let activeRegion = null
-
 let preservePitch = true
-const speeds = [0.25, 0.5, 1, 2, 4]  
+let selectedFile = null;
+let activeRegion = null;
+const speeds = [0.25, 0.5, 1, 2, 4];
+var spinner = document.getElementById("id_spinner_container");
 
-var trace 
-var melody_trace
+var retrainPoints = {}
+var selectedPoints = {}
 
-var newRange
-var selectedFile
-var xValuesRange
-var xValuesRangeLength
-var totalConfValues
-var cValues
-var retrainPoints
-// Initialize the Set
-var retrainPointsSet = new Set();
-
+var trace = null;
+var melody_trace = null;
+var newRange = null;
+var chartData
+const helpers = Chart.helpers
+var canvasData
+let isDragging = false;
+var activePoint
+var boxVisible = false;
 var myChart
 var canvas
 var ctx
-var activePoint
-const helpers = Chart.helpers
-var chartData
-var canvasData
-
-let isDragging = false;
 var selectionStart = { x: 0, y: 0 };
 var selectionEnd = { x: 0, y: 0 };
-var boxVisible = false;
-
+var xValuesRange = null;
 var init_index
 var index
 var yValue = null
-var selectedPoints = {}
-var spinner = document.getElementById("id_spinner_container");
+var xValuesRangeLength = null;
+var totalConfValues = null;
+var cValues = null;
 
+
+// ####################################################################################
+// Add a Spinner
 
 function showSpinner(spinner_text) {
     // show spinner
@@ -56,6 +54,8 @@ function hideSpinner() {
     spinner.style.display = 'none';
 }
 hideSpinner()
+
+// ####################################################################################
 
 
 var onChangeVolume = function (e) {
