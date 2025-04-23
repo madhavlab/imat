@@ -213,3 +213,35 @@ def custom_loss(yt, yp, ts=None):
             w = tf.multiply(w, w_mask)
         loss = loss_fn(yt, yp, sample_weight=w_mask)
     return loss
+
+def conf_loss(yt, yp, yc, ts):
+    """Loss function for confidence model."""
+    # Initialize with zeros using correct shape (based on win_size or actual shape)
+    yc_star = tf.zeros((yt.shape[0], yt.shape[1]), dtype=tf.float32)
+    
+    # Cast support indices to int32
+    ts = tf.cast(ts, dtype=tf.int32)
+    
+    # Create weight mask - only consider support indices
+    w_mask = tf.zeros(yt.shape[1], dtype=tf.float32)
+    w_mask = tf.tensor_scatter_nd_update(w_mask, tf.expand_dims(ts, 1), tf.ones_like(ts, dtype=tf.float32))
+    w_mask = tf.expand_dims(w_mask, 0)
+    
+    # Get ground truth pitch indices
+    true_indx = tf.argmax(yt, axis=-1)
+    true_indx = tf.reduce_max(true_indx, axis=0)
+    
+    # Create row indices for gathering
+    row_no = tf.range(0, yt.shape[1], 1)
+    row_no = tf.cast(row_no, tf.int32)
+    true_indx = tf.cast(true_indx, tf.int32)
+    indexing = tf.concat([row_no[:, tf.newaxis], true_indx[:, tf.newaxis]], axis=1)
+    
+    # THIS IS THE KEY DIFFERENCE:
+    # Original uses the actual model predictions at the ground truth indices
+    c_star = tf.gather_nd(yp[0], indexing)
+    c_star = c_star[tf.newaxis, :, tf.newaxis]
+    
+    # Calculate mean squared error loss
+    loss = mse(c_star, yc, sample_weight=tf.constant(w_mask))
+    return loss
