@@ -8,21 +8,13 @@ import mir_eval
 from flask import Flask, render_template, request, make_response, send_from_directory, jsonify
 
 # Import from utility modules
-from utils import melody_extraction, ConfidenceModel
-from melody_processing import (
-    get_spectrogram_json, get_melody_json, 
-    conf_values, pitch2wav, aml
-)
+
+import utils as ut
+import melody_processing as mp
 
 # Initialize Flask app
 app = Flask(__name__)
 app.config["CACHE_TYPE"] = "null"
-
-warnings.filterwarnings("ignore")
-
-app = Flask(__name__)
-app.config["CACHE_TYPE"] = "null"
-
 
 # Directory configuration
 wavfileDir = './AnnotatedData/UploadedWavFile'
@@ -56,10 +48,10 @@ ensure_directories_exist()
 fileIndx = 0
 
 # Load pre-trained models
-model = melody_extraction()
+model = ut.melody_extraction()
 model.build_graph([500, 513, 1])
 
-model_conf = ConfidenceModel(model)
+model_conf = ut.ConfidenceModel(model)
 model_conf.build_graph([500, 513, 1])
 model.load_weights('./models/pre/weights')
 model_conf.load_weights('./models/conf/weights')
@@ -78,8 +70,7 @@ def index():
                 os.remove(file_path)
                 
     return render_template('index.html')
-  
- 
+
 @app.route('/#browse')
 def browse():
   """Alternative route to index."""
@@ -110,12 +101,11 @@ def calculate_spectrogram():
     
     # Load audio and calculate spectrogram
     data, sr = librosa.load(os.path.join(wavfileDir, fileName), sr=8000)
-    Sxx, spec_data = get_spectrogram_json(data, sr)
+    Sxx, spec_data = mp.get_spectrogram_json(data, sr)
     
     # Calculate melody
-    melody_data = get_melody_json(model, Sxx)    
+    melody_data = mp.get_melody_json(model, Sxx)    
     return make_response([spec_data, melody_data])
-
 
 
 @app.route('/get_conf_values', methods=['POST'])
@@ -131,12 +121,11 @@ def get_conf_values():
     
     data, sr = librosa.load(os.path.join(wavfileDir, fileName), sr=8000)
     
-    Sxx, _ = get_spectrogram_json(data, sr)
-    confValues = conf_values(model_conf, Sxx)
+    Sxx, _ = mp.get_spectrogram_json(data, sr)
+    confValues = mp.conf_values(model_conf, Sxx)
     confValues = confValues.numpy()
     confValues = confValues.reshape(-1)
     return confValues.tolist()
-
 
 @app.route('/get_sliced_audio_original', methods=['POST'])
 def get_sliced_audio_original():
@@ -198,7 +187,7 @@ def get_sliced_audio_resynth():
     f_new, vc = mir_eval.melody.resample_melody_series(t, efv, v, t_new, kind='nearest')
     
     # Create synthesized audio
-    y_resynth = pitch2wav(f_new, t_new)
+    y_resynth = mp.pitch2wav(f_new, t_new)
     write(os.path.join(resynthwavfileDir, filename), sr, y_resynth)
     
     # Extract slice
@@ -213,7 +202,8 @@ def get_sliced_audio_resynth():
     response = send_from_directory(resynthwavfileDir, filename)
     response.headers["Content-Length"] = content_length
     return response
-  
+
+
 @app.route('/retrain_model', methods=['POST'])
 def retrain_model():
     """
@@ -258,7 +248,7 @@ def retrain_model():
     
     # Load audio and calculate spectrogram
     data, sr = librosa.load(os.path.join(wavfileDir, filename), sr=8000)
-    Sxx, _ = get_spectrogram_json(data, sr)
+    Sxx, _ = mp.get_spectrogram_json(data, sr)
     
     # Prepare for retraining
     final_gfv = [0] * len(original_gfv)
@@ -270,7 +260,7 @@ def retrain_model():
         active_frames[index] = 1
     
     # Retrain model and get updated predictions
-    updated_gfv = aml(Sxx, active_frames, final_gfv, fileIndx, model, model_conf, updatedWeightsDirPre+'/weights')
+    updated_gfv = mp.aml(Sxx, active_frames, final_gfv, fileIndx, model, model_conf, updatedWeightsDirPre+'/weights')
 
     # IMPORTANT: Load the updated weights into the global models
     model.load_weights(updatedWeightsDirPre+'/weights')
