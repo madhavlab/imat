@@ -18,6 +18,10 @@ from tcp_interface import *
 from aml_test import *
 import warnings
 
+## weights to be used finally!!
+# model.load_weights('./models/adaptive_weights/weights/meta_model/pre/meta_weights-500')
+# model_conf.load_weights('./models/conf/conf-weights-6000')
+
 warnings.filterwarnings("ignore")
 
 app = Flask(__name__)
@@ -115,7 +119,7 @@ def calc_rpa(efv,filename,indexes):
 def get_melody_json(Sxx,filename):
  
   _ , efv, t = plot_melody(model,Sxx)
-  print('efv len',len(efv))
+  # print('efv len',len(efv))
   
   t = [round(x, 2) for x in t]
   data = {
@@ -128,7 +132,7 @@ def get_melody_json(Sxx,filename):
 @app.route('/calculate_spectrogram', methods=['POST'])
 def calculate_spectrogram():
   global fileIndx
-  print(f'File Index...{fileIndx}')
+  # print(f'File Index...{fileIndx}')
   file = request.files['file']
   fileName = file.filename
   
@@ -137,10 +141,9 @@ def calculate_spectrogram():
   data, sr = librosa.load(os.path.join(wavfileDir, fileName), sr=8000)
   
   Sxx,spec_data = get_spectrogram_json(data,sr)
-  print('Melody spec',Sxx.shape)
+  # print('Melody spec',Sxx.shape)
   # print('Orignal RPA,RCA')
-  melody_data = get_melody_json(Sxx,fileName)
-  
+  melody_data = get_melody_json(Sxx,fileName) 
   return make_response([spec_data,melody_data])
 
 
@@ -408,4 +411,4 @@ def download():
 
 
 if __name__ == "__main__":
-  app.run(debug=True,port=2000)
+  app.run(debug=True,port=11000)
