@@ -910,3 +910,261 @@ function setupWavesurferEvents() {
     eventListenerReferences.wavesurfer.push({ event: 'interaction', handler: interactionHandler });
 }
 
+// Sets up region-related event handlers
+function setupRegionsEvents() {
+    // Enable region selection
+    wsRegions.enableDragSelection({
+        color: 'rgba(255,0,0,0.1)',
+    });
+    
+    // Region event handlers
+    const regionInHandler = (region) => {
+        activeRegion = region;
+        wavesurfer.play();
+    };
+    wsRegions.on('region-in', regionInHandler);
+    eventListenerReferences.regions.push({ event: 'region-in', handler: regionInHandler });
+    
+    const regionOutHandler = (region) => {
+        wavesurfer.stop();
+        activeRegion.remove();
+        activeRegion = null;
+    };
+    wsRegions.on('region-out', regionOutHandler);
+    eventListenerReferences.regions.push({ event: 'region-out', handler: regionOutHandler });
+    
+    const regionCreatedHandler = (region) => {
+        if (activeRegion) {
+            activeRegion.remove();
+            activeRegion = null;
+        }
+        activeRegion = region;
+    };
+    wsRegions.on('region-created', regionCreatedHandler);
+    eventListenerReferences.regions.push({ event: 'region-created', handler: regionCreatedHandler });
+    
+    const regionClickedHandler = (region, e) => {
+        e.stopPropagation(); // prevent triggering a click on the waveform
+        activeRegion = region;
+        region.play();
+    };
+    wsRegions.on('region-clicked', regionClickedHandler);
+    eventListenerReferences.regions.push({ event: 'region-clicked', handler: regionClickedHandler });
+}
+
+
+// Sets up the user interface elements
+function setupUserInterface() {
+    setupFileInfoUI();
+    setupAudioControlsUI();
+    setupSpectrogramUI();
+    attachUIEventListeners();
+}
+
+
+// Sets up the file information UI elements
+
+function setupFileInfoUI() {
+    document.querySelector('.js-label').innerHTML = `
+        <div class="filename-label">
+            <label>Audio file: ${selectedFile.name}</label>
+        </div>  
+        <div class="vol-zoom-playback">  
+            <div>
+                Volume: <input id="volume" type="range" min="0" max="1" step="0.1">
+            </div>  
+            <div class="zoom-label">
+                <label>Zoom: <input id="zoom" type="range" min="10" max="1000" value="100"></label>
+            </div>
+            <div>
+                <label>Playback rate: <span id="rate">1.00</span>x</label>
+                <label>0.25x <input id="playback-speed" type="range" min="0" max="4" step="1" value="2" /> 4x </label>
+                <label><input id="pitch-checkbox" type="checkbox" checked />Preserve pitch</label>
+            </div>
+        </div>`;
+}
+
+//  Sets up the audio controls UI elements
+
+function setupAudioControlsUI() {
+    document.querySelector('.js-audio-controls').innerHTML = `
+        <button class="btn-toggle-pause">
+            <i class="fa fa-play"></i> <i class="fa fa-pause"></i>
+        </button>
+        <button class="btn-stop">
+            <i class="fa fa-stop"></i>
+        </button>`;
+}
+
+// Sets up the spectrogram UI elements
+
+function setupSpectrogramUI() {
+    document.querySelector('.js-spectrogram').innerHTML = `
+        <button class="btn-spectrogram">
+            Show Spectrogram
+        </button>`;
+}
+
+function onChangeVolume(e) {
+    const volume = e.target.valueAsNumber;
+    wavesurfer.setVolume(volume);
+}
+
+// Attaches event listeners to UI elements
+
+function attachUIEventListeners() {
+    // Play/pause button
+    const playPauseBtn = document.querySelector('.btn-toggle-pause');
+    if (playPauseBtn) {
+        const playPauseHandler = function() {
+            if (activeRegion) {
+                if (!activeRegion.playing) {
+                    activeRegion.play();
+                } else {
+                    activeRegion.pause();
+                }
+            } else {
+                wavesurfer.playPause();
+            }
+        };
+        playPauseBtn.addEventListener("click", playPauseHandler);
+        eventListenerReferences.ui.push({ element: playPauseBtn, event: 'click', handler: playPauseHandler });
+    }
+    
+    // Stop button
+    const stopBtn = document.querySelector('.btn-stop');
+    if (stopBtn) {
+        const stopHandler = () => wavesurfer.stop();
+        stopBtn.addEventListener("click", stopHandler);
+        eventListenerReferences.ui.push({ element: stopBtn, event: 'click', handler: stopHandler });
+    }
+    
+    // Zoom control
+    const zoomControl = document.querySelector('#zoom');
+    if (zoomControl) {
+        const zoomHandler = (e) => {
+            const minPxPerSec = e.target.valueAsNumber;
+            wavesurfer.zoom(minPxPerSec);
+        };
+        zoomControl.addEventListener('input', zoomHandler);
+        eventListenerReferences.ui.push({ element: zoomControl, event: 'input', handler: zoomHandler });
+    }
+    
+    // Volume controls
+    const volumeControl = document.querySelector('#volume');
+    if (volumeControl) {
+        volumeControl.addEventListener('input', onChangeVolume);
+        volumeControl.addEventListener('change', onChangeVolume);
+        eventListenerReferences.ui.push({ element: volumeControl, event: 'input', handler: onChangeVolume });
+        eventListenerReferences.ui.push({ element: volumeControl, event: 'change', handler: onChangeVolume });
+    }
+    
+    // Pitch preservation checkbox
+    const pitchCheckbox = document.querySelector('#pitch-checkbox');
+    if (pitchCheckbox) {
+        const pitchHandler = (e) => {
+            preservePitch = e.target.checked;
+            wavesurfer.setPlaybackRate(wavesurfer.getPlaybackRate(), preservePitch);
+        };
+        pitchCheckbox.addEventListener('change', pitchHandler);
+        eventListenerReferences.ui.push({ element: pitchCheckbox, event: 'change', handler: pitchHandler });
+    }
+    
+    // Playback speed control
+    const playbackSpeedControl = document.querySelector('#playback-speed');
+    if (playbackSpeedControl) {
+        const playbackSpeedHandler = (e) => {
+            const speed = speeds[e.target.valueAsNumber];
+            document.querySelector('#rate').textContent = speed.toFixed(1);
+            wavesurfer.setPlaybackRate(speed, preservePitch);
+            wavesurfer.play();
+        };
+        playbackSpeedControl.addEventListener('input', playbackSpeedHandler);
+        eventListenerReferences.ui.push({ element: playbackSpeedControl, event: 'input', handler: playbackSpeedHandler });
+    }
+    
+    // Spectrogram button
+    const spectrogramBtn = document.querySelector('.btn-spectrogram');
+    if (spectrogramBtn) {
+        const spectrogramHandler = function() {
+            showSpinner("");
+                       
+            let formData = new FormData();
+            formData.append("file", selectedFile);
+            
+            // Fetch to send audio data to Flask backend
+            fetch("/calculate_spectrogram", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                plotSpectrogram(data);
+                hideSpinner();
+            })
+            .catch(error => {
+                console.error('Error generating spectrogram:', error);
+                alert('Error generating spectrogram. Please try again.');
+                hideSpinner();
+            });
+        };
+        spectrogramBtn.addEventListener("click", spectrogramHandler);
+        eventListenerReferences.ui.push({ element: spectrogramBtn, event: 'click', handler: spectrogramHandler });
+    }
+}
+
+// Cleans up existing resources before loading a new file
+
+function cleanupExistingResources() {
+   // Clean up wavesurfer event listeners
+   eventListenerReferences.wavesurfer.forEach(item => {
+       wavesurfer.un(item.event, item.handler);
+   });
+   eventListenerReferences.wavesurfer = [];
+   
+   // Clean up region event listeners
+   eventListenerReferences.regions.forEach(item => {
+       wsRegions.un(item.event, item.handler);
+   });
+   eventListenerReferences.regions = [];
+   
+   // Clean up UI event listeners
+   eventListenerReferences.ui.forEach(item => {
+       if (item.element) {
+           item.element.removeEventListener(item.event, item.handler);
+       }
+   });
+   eventListenerReferences.ui = [];
+   
+   // Remove all existing regions
+   if (wsRegions) {
+       wsRegions.clearRegions();
+   }
+   
+   // Reset active region
+   activeRegion = null;
+   
+   // Reset cursor position to beginning
+   if (wavesurfer) {
+       wavesurfer.stop(); // This stops playback
+       wavesurfer.setTime(0); // This explicitly sets the cursor to the beginning
+   }
+}
+
+
+// ####################################################################################
+document.addEventListener('DOMContentLoaded', () => {
+    const uploadButton = document.getElementById('uploadButton');
+
+    if (uploadButton) {
+        uploadButton.addEventListener('click', uploadAudio);
+    }
+});
+
+
+
