@@ -206,117 +206,82 @@ def get_conf_values():
   
   
   
-@app.route('/get_sliced_audio_original',methods=['POST'])
+@app.route('/get_sliced_audio_original', methods=['POST'])
 def get_sliced_audio_original():
-  file = request.files['file']
-  filename = file.filename
-  
-  start_time = float(request.form.get('start_time'))
-  end_time = float(request.form.get('end_time'))
-  
-  y,sr = librosa.load(os.path.join(wavfileDir,filename),sr=8000, offset= start_time, duration=end_time-start_time)
-  write(os.path.join(chunkwavfileDir,filename),sr,y)
-  # Set the correct Content-Length header
-  content_length = os.path.getsize(os.path.join(chunkwavfileDir, filename))
-  
-  response = send_from_directory(chunkwavfileDir, filename)
-  response.headers["Content-Length"] = content_length
-  
-  return response
+    """
+    Extract and serve a slice of the original audio.
+    
+    Returns:
+        Audio file response
+    """
+    file = request.files['file']
+    filename = file.filename
+    
+    start_time = float(request.form.get('start_time'))
+    end_time = float(request.form.get('end_time'))
+    
+    # Load and slice audio
+    y, sr = librosa.load(os.path.join(wavfileDir, filename), sr=8000, offset=start_time, duration=end_time-start_time)
+    write(os.path.join(chunkwavfileDir, filename), sr, y)
+    
+    # Set the correct Content-Length header
+    content_length = os.path.getsize(os.path.join(chunkwavfileDir, filename))
+    
+    response = send_from_directory(chunkwavfileDir, filename)
+    response.headers["Content-Length"] = content_length
+    
+    return response
 
-@app.route('/get_sliced_audio_resynth',methods=['POST'])
+@app.route('/get_sliced_audio_resynth', methods=['POST'])
 def get_sliced_audio_resynth():
-  file = request.files['file']
-  filename = file.filename
-  
-  efv = request.form.get('array')
-  efv = json.loads(efv)
-  
-  for key in efv:
-    efv = efv[key]
-  
-  start_time = float(request.form.get('start_time'))
-  end_time = float(request.form.get('end_time'))
-  
-  y,sr = librosa.load(os.path.join(wavfileDir,filename),sr=8000)
-  t = np.array([0.01*i for i in range(len(efv))])
-  t_new = np.array([i/sr for i in range(len(y))])  
-  
-  v = np.array([1 if i!=0 else 0 for i in efv])
-  f_new,vc = mir_eval.melody.resample_melody_series(t,efv,v,t_new,kind='nearest')
-  y_resynth = pitch2wav(f_new,t_new)
- 
-  write(os.path.join(resynthwavfileDir,filename),sr,y_resynth)
-  
-  y_resynth_chunked,sr = librosa.load(os.path.join(resynthwavfileDir,filename),sr=None, mono=True, offset= start_time, duration=end_time-start_time)
-
-  write(os.path.join(resynthwavfileDir,filename),sr,y_resynth_chunked)
-  
-  content_length = os.path.getsize(os.path.join(resynthwavfileDir, filename))
+    """
+    Extract, resynthesize, and serve a slice of audio based on melody.
     
-  response = send_from_directory(resynthwavfileDir, filename)
-  response.headers["Content-Length"] = content_length
-  return response
-  
-
-def pitch2wav(f,t, FLAG_extend=False):
-    if FLAG_extend:
-        for n in range(1,len(f)):
-            if f[n] == 0:
-                f[n] = f[n-1]
-
-    theta = [2*np.pi*f[0]*t[0]]
-    for i in range(1,len(f)):
-        delta_theta = 0.5* (2*np.pi*f[i]+2*np.pi*f[i-1]) * (t[i]-t[i-1])
-        theta.append(theta[i-1]+delta_theta)
-    return 0.5*np.sin(theta)
-  
-  
-# @app.route('/retrain_model',methods=['POST'])
-# def retrain_model():
-#   file = request.files['file']
-#   filename = file.filename
-  
-#   efv = request.form.get('orig_array')
-#   efv = json.loads(efv)  
-#   for key in efv:
-#     efv = efv[key]
+    Returns:
+        Audio file response with resynthesized melody
+    """
+    file = request.files['file']
+    filename = file.filename
     
-#   # conf_values = request.form.get('conf_values')
-#   # conf_values = json.loads(conf_values)
- 
+    efv = request.form.get('array')
+    efv = json.loads(efv)
     
-#   retrainValues = request.form.get('retrain_values')
-#   retrainValues = json.loads(retrainValues)
-  
-#   unique_retrainValues = set(map(tuple, retrainValues))
-#   unique_retrainValues = [list(item) for item in unique_retrainValues]
-  
-#   unique_retrainValues = sorted(unique_retrainValues, key=lambda x: x[0]) 
-#   support_indx, gfv = zip(*unique_retrainValues)
-#   support_indx = list(support_indx)
-#   print('support index',support_indx)
-#   gfv = list(gfv)
-  
-#   # init_index = int(request.form.get('initial_index'))  
-#   # end_index = int(request.form.get('end_index'))
-  
-#   data,sr = librosa.load(os.path.join(wavfileDir,filename),sr=8000)
-  
-#   Sxx,_ = get_spectrogram_json(data,sr)
+    for key in efv:
+        efv = efv[key]
     
-#   final_gfv = [0] * len(efv)
+    start_time = float(request.form.get('start_time'))
+    end_time = float(request.form.get('end_time'))
+    
+    # Load original audio
+    y, sr = librosa.load(os.path.join(wavfileDir, filename), sr=8000)
+    
+    # Create time series
+    t = np.array([0.01 * i for i in range(len(efv))])
+    t_new = np.array([i/sr for i in range(len(y))])
+    
+    # Prepare voicing
+    v = np.array([1 if i != 0 else 0 for i in efv])
+    
+    # Resample melody to audio time points
+    f_new, vc = mir_eval.melody.resample_melody_series(t, efv, v, t_new, kind='nearest')
+    
+    # Create synthesized audio
+    y_resynth = pitch2wav(f_new, t_new)
+    write(os.path.join(resynthwavfileDir, filename), sr, y_resynth)
+    
+    # Extract slice
+    y_resynth_chunked, sr = librosa.load(os.path.join(resynthwavfileDir, filename), 
+                                         sr=None, mono=True, offset=start_time, 
+                                         duration=end_time-start_time)
+    
+    write(os.path.join(resynthwavfileDir, filename), sr, y_resynth_chunked)
+    
+    content_length = os.path.getsize(os.path.join(resynthwavfileDir, filename))
+    
+    response = send_from_directory(resynthwavfileDir, filename)
+    response.headers["Content-Length"] = content_length
+    return response
   
-#   for index,value in zip(support_indx,gfv):
-#     final_gfv[index] = value       
-  
-#   updated_gfv, updated_conf = aml_test(Sxx,support_indx,final_gfv,init_index,end_index) 
-#   # updated_conf = updated_conf[init_index:end_index]
-#   # updated_conf = updated_conf.numpy()
-#   return make_response([updated_gfv, updated_conf.tolist(), support_indx])
-
-
-
 @app.route('/retrain_model', methods=['POST'])
 def retrain_model():
     """
