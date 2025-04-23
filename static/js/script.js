@@ -569,3 +569,247 @@ function retrainModel() {
         alert('No points to update!');
     }
 }
+
+// ####################################################################################
+// Plot Spectogram and make it interactive
+
+function plotSpectrogram(data) {
+    trace = {
+        x: data[0].x,
+        y: data[0].y,
+        z: data[0].z,
+        showscale: true,
+        colorscale: 'Viridis',
+        type: 'heatmap',
+        colorbar: {visible: false}
+    };
+
+    melody_trace = {
+        x: data[1]['t'],
+        y: data[1]['f'],
+        type: 'scatter',
+        mode: 'lines',
+        line: {
+            color: 'red' // Set the color of the lines
+        },
+        showlegend : false,
+    }
+
+    var overlayData = melody_trace.x
+    var verticalLines = overlayData.map(function (xValue){
+        return {
+            type: 'line',
+            xref: 'x',
+            yref: 'paper',
+            x0: xValue,
+            x1: xValue,
+            y0: 0,
+            y1: 1,
+            line: {
+                color:'gray',
+                width: 0.5
+            }
+        }
+    })
+
+    const layout = {
+        yaxis: {title: 'Frequency (Hz)',
+                fixedrange: true,
+                range: [0,4000],
+                autorange: false,
+                },
+        margin: {
+            b:20
+        },
+        
+    };
+
+    const config = {responsive: true};
+    Plotly.newPlot('js-display-spectrogram',[trace],layout,config);
+
+    document.querySelector('.js-show-melody-annotate-download')
+        .innerHTML = `
+                <div class="show-melody-annotate">
+                    <div class="show-melody"><input type="checkbox"> Show Melody</div>
+                    <div class="annotate"><button class="annotate-btn">Annotate</button></div>
+                    <div class="download"><button class="download-btn">Download CSV</button></div>
+                </div>`
+
+    const checkbox = document.querySelector('.js-show-melody-annotate-download input[type="checkbox"]');
+    checkbox.addEventListener("change", function () {
+        if (checkbox.checked) {
+            Plotly.addTraces('js-display-spectrogram', [melody_trace]);
+        } else {
+            Plotly.deleteTraces('js-display-spectrogram', 1);
+        }
+    });
+
+    // Download the pitch by clicking on the Download CSV button
+    document.querySelector('.download-btn')
+        .addEventListener("click",function(){
+            if (!checkbox.checked) {
+                alert('Show Melody!')
+            } else {
+                const formData = new FormData()
+                formData.append('file',selectedFile)
+                formData.append('freq',JSON.stringify({data: melody_trace.y}))
+
+                fetch("/download", {
+                    method: "POST",
+                    body: formData
+                })
+                alert('Annotations Downloaded');
+            }
+    })
+
+    const originalRange = document.getElementById('js-display-spectrogram')
+
+    // Zoom into the spectrogram and update the Plotly plot
+    document.getElementById('js-display-spectrogram').on('plotly_relayout', function (eventData) {
+        if (eventData['xaxis.range[0]'] !== undefined && eventData['xaxis.range[1]'] !== undefined) {
+            if (eventData['xaxis.range[0]'] < 0) {
+                newRange = [0 , eventData['xaxis.range[1]']];
+
+            } else {
+                newRange = [eventData['xaxis.range[0]'], eventData['xaxis.range[1]']];
+                newRange = [parseFloat(eventData['xaxis.range[0]'].toFixed(2)), eventData['xaxis.range[1]']];
+            }
+            Plotly.update('js-display-spectrogram', { 'xaxis.range': newRange});            
+        } 
+        else {
+            newRange = [Math.abs(originalRange._fullLayout.xaxis.range[0]*0),originalRange._fullLayout.xaxis.range[1]]
+        }
+    });
+
+    document.querySelector('.annotate-btn')
+        .addEventListener("click",function(){
+            if (!checkbox.checked){
+                alert('Show Melody!')
+            } else {
+
+                showSpinner("")
+
+                if (newRange === undefined) {
+                    newRange = [-1*(originalRange._fullLayout.xaxis.range[0]*0),originalRange._fullLayout.xaxis.range[1]]
+                    newRange = [parseFloat(newRange[0].toFixed(2)),newRange[1]]
+                }
+               
+                xValuesRange = melody_trace.x.filter(value => value >= newRange[0] && value <= newRange[1])
+                xValuesRangeLength = xValuesRange.length
+                const filteredYValues = xValuesRange.map(x => {
+                    const index = melody_trace.x.indexOf(x);
+                    return melody_trace.y[index]
+                })
+
+                const layout1 = {
+                    autosize: true,
+                    xaxis: {range: newRange,
+                            fixedrange:true,
+                            visible: false,
+                            },
+                    yaxis: {
+                            autorange: true,
+                            range: [0,4000],
+                            visible: false,
+                            },                            
+                    hovermode: null,  
+                    }
+                const zoom_trace = [trace];                    
+                const config = {responsive: false};
+
+                Plotly.newPlot('js-display-zoom-spectrogram-melody',zoom_trace,layout1,config)   
+                hideSpinner("") 
+
+                var confValues = getConfValues(xValuesRange.length)                
+
+                updateChart(xValuesRange,filteredYValues)
+
+                document.querySelector('.js-or-re-tbtn')
+                    .innerHTML = `
+                                    <label class="switch" id="js-or-switch"><input type="checkbox" checked> Include Original Audio <label for="volumeSliderOr"></label>
+                                    <input type="range" id="volumeSliderOr" min="0" max="1" step="0.1" value="1"> 
+                                    <label class="switch" id="js-re-switch"><input type="checkbox" checked> Include Resynthesize Audio <label for="volumeSliderRe" ></label>
+                                    <input type="range" id="volumeSliderRe" min="0" max="1" step="0.1" value="1"> 
+                                    <label class="switch" id="js-bo-switch"><input type="checkbox"> Include both serially </label>                             
+                                        `
+
+                document.querySelector('.js-play-btn')
+                    .innerHTML = `<button class="play-button">Play</button>`
+                document.querySelector('.js-remove-btn')
+                    .innerHTML = `<button class="remove-button">Remove pitches</button>`
+                document.querySelector('.js-retrain-btn')
+                    .innerHTML = `<button class="retrain-button">Retrain model</button>`
+
+
+                document.querySelector('.js-play-btn')
+                    .addEventListener("click",function(){
+                        const volumeSliderOr = document.getElementById('volumeSliderOr');
+                        const volumeSliderRe = document.getElementById('volumeSliderRe');
+                        // Store last used volume
+                        let lastVolumeOr = volumeSliderOr.value;
+                        let lastVolumeRe = volumeSliderRe.value;
+
+                        const formData = new FormData()
+                        formData.append('file',selectedFile)
+                        formData.append('start_time',newRange[0])
+                        formData.append('end_time',newRange[1])
+                        
+                        const formData1 = new FormData()
+                        formData1.append('file',selectedFile)
+                        formData1.append('array',JSON.stringify({data: melody_trace.y}))
+                        formData1.append('start_time',newRange[0])
+                        formData1.append('end_time',newRange[1])
+
+                        const fetch1 = fetch("/get_sliced_audio_original", { method: "POST", body: formData });
+                        const fetch2 = fetch("/get_sliced_audio_resynth", { method: "POST", body: formData1 });
+
+                        Promise.all([fetch1, fetch2])
+                        .then(responses => Promise.all(responses.map(response => response.blob())))
+                        .then(blobs => {
+                            const audio1 = new Audio(URL.createObjectURL(blobs[0]));
+                            const audio2 = new Audio(URL.createObjectURL(blobs[1]));
+
+                            // Set volume to last used value
+                            audio1.volume = lastVolumeOr;
+                            audio2.volume = lastVolumeRe;
+
+                            // Event listener for volume slider change for Original Audio
+                            volumeSliderOr.addEventListener('input', function () {
+                                audio1.volume = volumeSliderOr.value;
+                            });
+
+                            // Event listener for volume slider change for Resynthesize Audio
+                            volumeSliderRe.addEventListener('input', function () {
+                                audio2.volume = volumeSliderRe.value;
+                            });
+
+                            
+                            var checkboxes = document.querySelectorAll('.js-or-re-tbtn input[type="checkbox"]')
+
+                            if (checkboxes[0].checked && !checkboxes[1].checked && !checkboxes[2].checked) {
+                                playAudio(audio1);
+                            } else if (!checkboxes[0].checked && checkboxes[1].checked && !checkboxes[2].checked) {
+                                playAudio(audio2);
+                            } else if (checkboxes[0].checked && checkboxes[1].checked && !checkboxes[2].checked) {
+                                playAudio(audio1);
+                                playAudio(audio2);
+                            } else if (checkboxes[0].checked && checkboxes[1].checked && checkboxes[2].checked) {
+                                audio1.addEventListener('ended', () => {
+                                    playAudio(audio2);
+                                });
+                                playAudio(audio1);
+                            }
+
+                        })
+                        updateChart(xValuesRange,filteredYValues)
+                                            
+                    }) 
+            
+            }
+
+            document.querySelector('.js-retrain-btn')
+                .addEventListener("click",retrainModel)
+
+        })   
+
+}
