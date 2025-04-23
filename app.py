@@ -37,28 +37,33 @@ filename = None
 
 fileIndx = 0
 
-@app.route('/')   #@app.route is the python decorator
+@app.route('/')
 def index():
-  global fileIndx
-  fileIndx = 0
-  for filename in os.listdir(wavfileDir):
-            file_path = os.path.join(wavfileDir, filename)
+    """Initialize the application and clean up directories."""
+    global fileIndx
+    fileIndx = 0
+    
+    # Clean up directories
+    for directory in [wavfileDir, chunkwavfileDir, resynthwavfileDir]:
+        for filename in os.listdir(directory):
+            file_path = os.path.join(directory, filename)
             if os.path.isfile(file_path):
                 os.remove(file_path)
-  for filename in os.listdir(chunkwavfileDir):
-          file_path = os.path.join(chunkwavfileDir, filename)
-          if os.path.isfile(file_path):
-              os.remove(file_path)
-  for filename in os.listdir(resynthwavfileDir):
-          file_path = os.path.join(resynthwavfileDir, filename)
-          if os.path.isfile(file_path):
-              os.remove(file_path)
-  return render_template('index.html')
+                
+    return render_template('index.html')
   
  
 @app.route('/#browse')
 def browse():
+  """Alternative route to index."""
+  # Clean up directories
+  for directory in [updatedWeightsDirPre,updatedWeightsDirConf]:
+      for filename in os.listdir(directory):
+          file_path = os.path.join(directory, filename)
+          if os.path.isfile(file_path):
+              os.remove(file_path)
   return render_template('index.html')
+
 
 @app.route('/calculate_spectrogram', methods=['POST'])
 def calculate_spectrogram():
