@@ -316,74 +316,72 @@ def pitch2wav(f,t, FLAG_extend=False):
 #   return make_response([updated_gfv, updated_conf.tolist(), support_indx])
 
 
-@app.route('/retrain_model',methods=['POST'])
+
+@app.route('/retrain_model', methods=['POST'])
 def retrain_model():
-  file = request.files['file']
-  filename = file.filename
-  
-  global fileIndx
-  
-  original_gfv = request.form.get('orig_array')
-  original_gfv = json.loads(original_gfv)  
-  for key in original_gfv:
-    original_gfv = original_gfv[key]
+    """
+    Retrain the model using user annotations.
     
-  conf_val = request.form.get('conf_values')
-  conf_val = json.loads(conf_val)  
-
-  retrainValues = request.form.get('retrain_values')
-  retrainValues = json.loads(retrainValues)  
-  unique_retrainValues = set(map(tuple, retrainValues))
-  unique_retrainValues = [list(item) for item in unique_retrainValues]  
-  unique_retrainValues = sorted(unique_retrainValues, key=lambda x: x[0])   
-  support_indx, gfv = zip(*unique_retrainValues)
-  support_indx = list(support_indx)
-  support_indx = [int(i) for i in support_indx]
-  print('Total support index',len(support_indx))
-  
-  # rows = []
-  # for i in support_indx:
-  #   rows.append([i,conf_val[i]])  
-  
-  # with open(os.path.join(supportindxDir,filename.split('.')[0]+'.csv'),'w') as file:
-  #   writer = csv.writer(file)
-  #   writer.writerows(rows)
-  
-  gfv = list(gfv)  
-  original_indexes = set(support_indx)
-  query_indx = [x for x in range(len(original_gfv)) if x not in original_indexes]
-  # print(f'Query Index..{query_indx}')
-   
-  
-  data,sr = librosa.load(os.path.join(wavfileDir,filename),sr=8000)
-  Sxx,_ = get_spectrogram_json(data,sr)
-  
-  # get the rpa,rca,oa on the query set on the initial prediction
-  # _ , initial_pred, _ = plot_melody(model,Sxx)  
-  # print(f'rpa,rca,oa on the query set on the initial prediction')
-  # actual_gfv = calc_rpa(initial_pred,filename,query_indx)  
-  # print(f'Accuracy on the query set on before adaptation')
-  # actual_gfv = calc_rpa(original_gfv,filename,query_indx)
-  
-  # for i in range(len(initial_pred)):
-  #   print(i*0.01,actual_gfv[i], initial_pred[i], original_gfv[i])
-  
-  final_gfv = [0] * len(original_gfv)
-  active_frames = [0] * len(original_gfv)
-  # print(f'length of finalgfv and active frames...{len(final_gfv)} {len(gfv)} {len(active_frames)}')
-  
-  for index,value in zip(support_indx,gfv):
-    final_gfv[index] = value     
-    active_frames[index] = 1
+    Returns:
+        Updated melody frequencies
+    """
+    global fileIndx, model, model_conf
     
-  updated_gfv = aml_test(Sxx,active_frames,final_gfv,fileIndx)
-  print(f'Accuracy on the query set after retraining for {fileIndx+1} times')
-  # calc_rpa(updated_gfv,filename,query_indx)
+    file = request.files['file']
+    filename = file.filename
+    
+    # Get original melody prediction
+    original_gfv = request.form.get('orig_array')
+    original_gfv = json.loads(original_gfv)
+    for key in original_gfv:
+        original_gfv = original_gfv[key]
+    
+    # Get confidence values
+    conf_val = request.form.get('conf_values')
+    conf_val = json.loads(conf_val)
+    
+    # Get user annotations
+    retrainValues = request.form.get('retrain_values')
+    retrainValues = json.loads(retrainValues)
+    
+    # Process annotations to get unique points
+    unique_retrainValues = set(map(tuple, retrainValues))
+    unique_retrainValues = [list(item) for item in unique_retrainValues]
+    unique_retrainValues = sorted(unique_retrainValues, key=lambda x: x[0])
+    
+    # Extract support indices and ground truth frequencies
+    support_indx, gfv = zip(*unique_retrainValues)
+    support_indx = list(support_indx)
+    support_indx = [int(i) for i in support_indx]
+    gfv = list(gfv)
+    
+    # Find indices not in support set
+    original_indexes = set(support_indx)
+    query_indx = [x for x in range(len(original_gfv)) if x not in original_indexes]
+    
+    # Load audio and calculate spectrogram
+    data, sr = librosa.load(os.path.join(wavfileDir, filename), sr=8000)
+    Sxx, _ = get_spectrogram_json(data, sr)
+    
+    # Prepare for retraining
+    final_gfv = [0] * len(original_gfv)
+    active_frames = [0] * len(original_gfv)
+    
+    # Mark active frames and set ground truth values
+    for index, value in zip(support_indx, gfv):
+        final_gfv[index] = value
+        active_frames[index] = 1
+    
+    # Retrain model and get updated predictions
+    updated_gfv = aml(Sxx, active_frames, final_gfv, fileIndx, model, model_conf, updatedWeightsDirPre+'/weights')
 
-  fileIndx+=1
-  return make_response([updated_gfv])
-  # return '',204
+    # IMPORTANT: Load the updated weights into the global models
+    model.load_weights(updatedWeightsDirPre+'/weights')
+    model_conf.load_weights(updatedWeightsDirConf+'/weights')
 
+    fileIndx += 1
+
+    return make_response([updated_gfv])
 
 @app.route('/download', methods=['POST'])
 def download():
