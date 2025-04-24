@@ -57,6 +57,39 @@ hideSpinner()
 
 // ####################################################################################
 
+// Add a new function to update point colors based on selection
+function updatePointColors() {
+    // If myChart doesn't exist, return early
+    if (!myChart || !myChart.data || !myChart.data.datasets || !myChart.data.datasets[0]) return;
+       
+    // Create arrays of default red color for all points
+    const defaultColor = 'red';
+    const selectedColor = 'blue';
+    const pointColors = Array(myChart.data.labels.length).fill(defaultColor);
+    
+    // Calculate base index
+    const init_index = parseFloat((newRange[0]).toFixed(2)) * 100;
+    
+    // Set selected points to blue
+    if (selectedPoints && selectedPoints.x && selectedPoints.x.length > 0) {        
+        selectedPoints.x.forEach(globalIndex => {
+            const chartIndex = globalIndex - init_index;
+            if (chartIndex >= 0 && chartIndex < pointColors.length) {
+                pointColors[chartIndex] = selectedColor;
+            }
+        });
+    }
+    
+    // Apply colors to chart
+    myChart.data.datasets[0].pointBackgroundColor = pointColors;
+    myChart.data.datasets[0].pointBorderColor = pointColors;
+    
+    // Force chart update
+    myChart.update();
+}
+
+// ####################################################################################
+
 function map(value, start1, stop1, start2, stop2) {
     return start2 + (stop2 - start2) * ((value - start1) / (stop1 - start1))
 };
@@ -98,6 +131,7 @@ function move_handler(event) {
                          selectedPoints.x.includes(globalIndex);
     
     if (isInSelection) {
+        updatePointColors();
         // Calculate the change amount
         const diff = yValue - data.datasets[datasetIndex].data[pointIndex];
         
@@ -120,13 +154,15 @@ function move_handler(event) {
             }
             yIdx++;
         });
+        
+        // Add highlight for selected points
+        updatePointColors();
     } else {
         // Just update the active point
         data.datasets[datasetIndex].data[pointIndex] = yValue;
         
         // Add to retrainPoints in real-time
         retrainPoints[globalIndex] = yValue;
-       
     }
 
     // Update canvasData to reflect new positions
@@ -205,6 +241,7 @@ function up_handler(event) {
 }
 
 
+// Modify handleRightClick to reset colors when selection is cleared
 function handleRightClick(event) {
     event.preventDefault(); // Prevent the context menu from appearing
     
@@ -225,12 +262,20 @@ function handleRightClick(event) {
         myChart.options.events = true;
     }
     
+    // Reset point colors to default
+    if (myChart && myChart.data && myChart.data.datasets && myChart.data.datasets[0]) {
+        const defaultColor = 'red';
+        myChart.data.datasets[0].pointBackgroundColor = Array(myChart.data.labels.length).fill(defaultColor);
+        myChart.data.datasets[0].pointBorderColor = Array(myChart.data.labels.length).fill(defaultColor);
+    }
+    
     // Log to confirm selection has been cleared
     console.log('Selection cleared by right-click');
     
     // Update the chart to refresh the display
     myChart.update();
 }
+
 
 function renderSelectionBox() {
     const x = Math.min(selectionStart.x, selectionEnd.x);
@@ -276,6 +321,9 @@ function adjustSelectedPoints() {
             count: selectedPoints.x.length
         }
     );
+    
+    // Update point colors to show selection
+    updatePointColors();
 }
 
 function removeButtonClickHandler() {
