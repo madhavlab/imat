@@ -33,18 +33,16 @@
 }
 
 
-.right-section{
+.right-section {
     display: flex;
-    height: 20px;
-    width: 500px;
-    flex-direction: row;
-    margin-left: 14px;
     align-items: center;
-    justify-content: space-between;
-
+    justify-content: flex-end; 
+    margin-right: 20px; 
+    width: 100%; 
 }
-
+  
 .right-section .header-link {
+    margin-left: auto; 
     font-size: 24px;
 }
 
