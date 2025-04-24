@@ -6,9 +6,10 @@ import librosa
 from scipy.io.wavfile import write
 import mir_eval
 from flask import Flask, render_template, request, make_response, send_from_directory, jsonify
+import time, io
+import socket
 
 # Import from utility modules
-
 import utils as ut
 import melody_processing as mp
 
@@ -133,25 +134,36 @@ def get_sliced_audio_original():
     Extract and serve a slice of the original audio.
     
     Returns:
-        Audio file response
+        Audio file data as binary response
     """
-    file = request.files['file']
-    filename = file.filename
-    
-    start_time = float(request.form.get('start_time'))
-    end_time = float(request.form.get('end_time'))
-    
-    # Load and slice audio
-    y, sr = librosa.load(os.path.join(wavfileDir, filename), sr=8000, offset=start_time, duration=end_time-start_time)
-    write(os.path.join(chunkwavfileDir, filename), sr, y)
-    
-    # Set the correct Content-Length header
-    content_length = os.path.getsize(os.path.join(chunkwavfileDir, filename))
-    
-    response = send_from_directory(chunkwavfileDir, filename)
-    response.headers["Content-Length"] = content_length
-    
-    return response
+    try:
+        file = request.files['file']
+        filename = file.filename
+        
+        start_time = float(request.form.get('start_time'))
+        end_time = float(request.form.get('end_time'))
+        
+        # Load and slice audio
+        y, sr = librosa.load(os.path.join(wavfileDir, filename), sr=8000, offset=start_time, duration=end_time-start_time)
+        
+        # Create a BytesIO object to avoid file system operations
+        buffer = io.BytesIO()
+        write(buffer, sr, y)
+        buffer.seek(0)
+        
+        # Return the raw audio data
+        response = make_response(buffer.read())
+        response.headers['Content-Type'] = 'audio/wav'
+        
+        return response
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"ERROR in get_sliced_audio_original: {str(e)}")
+        print(error_trace)
+        return jsonify({"error": str(e), "trace": error_trace}), 500
+
 
 @app.route('/get_sliced_audio_resynth', methods=['POST'])
 def get_sliced_audio_resynth():
@@ -161,47 +173,63 @@ def get_sliced_audio_resynth():
     Returns:
         Audio file response with resynthesized melody
     """
-    file = request.files['file']
-    filename = file.filename
-    
-    efv = request.form.get('array')
-    efv = json.loads(efv)
-    
-    for key in efv:
-        efv = efv[key]
-    
-    start_time = float(request.form.get('start_time'))
-    end_time = float(request.form.get('end_time'))
-    
-    # Load original audio
-    y, sr = librosa.load(os.path.join(wavfileDir, filename), sr=8000)
-    
-    # Create time series
-    t = np.array([0.01 * i for i in range(len(efv))])
-    t_new = np.array([i/sr for i in range(len(y))])
-    
-    # Prepare voicing
-    v = np.array([1 if i != 0 else 0 for i in efv])
-    
-    # Resample melody to audio time points
-    f_new, vc = mir_eval.melody.resample_melody_series(t, efv, v, t_new, kind='nearest')
-    
-    # Create synthesized audio
-    y_resynth = mp.pitch2wav(f_new, t_new)
-    write(os.path.join(resynthwavfileDir, filename), sr, y_resynth)
-    
-    # Extract slice
-    y_resynth_chunked, sr = librosa.load(os.path.join(resynthwavfileDir, filename), 
-                                         sr=None, mono=True, offset=start_time, 
-                                         duration=end_time-start_time)
-    
-    write(os.path.join(resynthwavfileDir, filename), sr, y_resynth_chunked)
-    
-    content_length = os.path.getsize(os.path.join(resynthwavfileDir, filename))
-    
-    response = send_from_directory(resynthwavfileDir, filename)
-    response.headers["Content-Length"] = content_length
-    return response
+    try:
+        file = request.files['file']
+        filename = file.filename
+        
+        efv = request.form.get('array')
+        efv = json.loads(efv)
+        
+        for key in efv:
+            efv = efv[key]
+        
+        start_time = float(request.form.get('start_time'))
+        end_time = float(request.form.get('end_time'))
+        
+        # Load original audio
+        y, sr = librosa.load(os.path.join(wavfileDir, filename), sr=8000)
+        
+        # Create time series
+        t = np.array([0.01 * i for i in range(len(efv))])
+        t_new = np.array([i/sr for i in range(len(y))])
+        
+        # Prepare voicing
+        v = np.array([1 if i != 0 else 0 for i in efv])
+         
+        # Resample melody to audio time points
+        f_new, vc = mir_eval.melody.resample_melody_series(t, efv, v, t_new, kind='nearest')
+        
+        # Create synthesized audio
+        y_resynth = mp.pitch2wav(f_new, t_new)
+        
+        # Generate a unique filename to avoid conflicts
+        resynth_filename = f"resynth_{int(time.time())}_{filename}"
+        resynth_path = os.path.join(resynthwavfileDir, resynth_filename)
+        
+        # Write full audio
+        write(resynth_path, sr, y_resynth)
+        
+        # Extract slice
+        y_resynth_chunked, sr = librosa.load(resynth_path, 
+                                            sr=None, mono=True, offset=start_time, 
+                                            duration=end_time-start_time)
+        # Create a BytesIO object to avoid file system operations
+        buffer = io.BytesIO()
+        write(buffer, sr, y_resynth_chunked)
+        buffer.seek(0)
+
+        # Return the raw audio data
+        response = make_response(buffer.read())
+        response.headers['Content-Type'] = 'audio/wav'
+        
+        return response
+        
+    except Exception as e:
+        import traceback
+        error_trace = traceback.format_exc()
+        print(f"ERROR in get_sliced_audio_resynth: {str(e)}")
+        print(error_trace)
+        return jsonify({"error": str(e), "trace": error_trace}), 500
 
 
 @app.route('/retrain_model', methods=['POST'])
