@@ -211,7 +211,7 @@ function up_handler(event) {
 }
 
 
-// Modify handleRightClick to reset colors when selection is cleared
+// HandleRightClick to reset colors when selection is cleared
 function handleRightClick(event) {
     event.preventDefault();
 
@@ -454,23 +454,138 @@ function updateChart(xValuesRange,filteredYValues) {
 
 // ####################################################################################
 
-function playAudio(audio) {
+function createTimeMarker() {
+    // Check if marker already exists and remove it
+    const existingMarker = document.getElementById('time-marker');
+    if (existingMarker) {
+        existingMarker.remove();
+    }
+    
+    // Create the marker element
+    const marker = document.createElement('div');
+    marker.id = 'time-marker';
+    marker.style.position = 'absolute';
+    marker.style.top = '0';
+    marker.style.width = '2px';
+    marker.style.height = '100%';
+    marker.style.backgroundColor = 'red';
+    marker.style.zIndex = '1000';
+    marker.style.pointerEvents = 'none';
+    marker.style.transition = 'left 0.1s linear';
+    
+    // Add it to the chart container
+    const container = document.querySelector('.chart-container');
+    if (container) {
+        container.appendChild(marker);
+        return marker;
+    }
+    return null;
+}
+
+function updateTimeMarkerPosition(marker, startTime, currentTime, endTime, container) {
+    if (!marker || !container || !myChart) return;
+    
+    // Calculate the current time value
+    const timeValue = currentTime;
+    
+    // Convert the time value to x-coordinate using the chart's scales
+    // This ensures proper alignment with data points
+    const xScale = myChart.scales['x-axis-0'];
+    
+    // Find the closest x value in our data points
+    const closestXValue = findClosestXValue(timeValue);
+    
+    // Use the chart's scale to get the pixel position
+    const pixelPosition = xScale.getPixelForValue(closestXValue);
+    
+    // Set the marker position directly
+    marker.style.left = pixelPosition + 'px';
+}
+
+// Helper function to find the closest x value in our data
+function findClosestXValue(timeValue) {
+    // If we don't have xValuesRange, return the time value
+    if (!xValuesRange || xValuesRange.length === 0) return timeValue;
+    
+    // Find the closest match
+    return xValuesRange.reduce((prev, curr) => 
+        Math.abs(curr - timeValue) < Math.abs(prev - timeValue) ? curr : prev
+    );
+}
+
+function playAudio(audio, startTime, endTime) {
+    const marker = createTimeMarker();
+    const container = document.querySelector('.chart-container');
+    
+    // Position marker initially at the first data point, not at the beginning of the chart
+    if (marker && myChart && xValuesRange && xValuesRange.length > 0) {
+        const firstDataPoint = xValuesRange[0]; // The first x value in our visible range
+        const xScale = myChart.scales['x-axis-0'];
+        const initialPixelPosition = xScale.getPixelForValue(firstDataPoint);
+        marker.style.left = initialPixelPosition + 'px';
+    }
+    
+    // Animation variables
+    let animationFrameId = null;
+    let lastTime = 0;
+    
+    // Animation function using requestAnimationFrame for smoother updates
+    const animateMarker = (timestamp) => {
+        if (!lastTime) lastTime = timestamp;
+        
+        // Only update every 30ms for efficiency
+        if (timestamp - lastTime >= 30) {
+            updateTimeMarkerPosition(marker, startTime, audio.currentTime + startTime, endTime, container);
+            lastTime = timestamp;
+        }
+        
+        if (!audio.paused && !audio.ended) {
+            animationFrameId = requestAnimationFrame(animateMarker);
+        } else if (audio.ended) {
+            if (marker) marker.style.display = 'none';
+        }
+    };
+    
+    // Add event listeners
+    audio.addEventListener('play', () => {
+        if (marker) marker.style.display = 'block';
+        animationFrameId = requestAnimationFrame(animateMarker);
+    });
+    
+    audio.addEventListener('pause', () => {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+    });
+    
+    audio.addEventListener('ended', () => {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+        if (marker) marker.style.display = 'none';
+    });
+    
     if (audio.readyState >= 2) {
         audio.play()
             .then(() => {
-                // Playback successful
+                // We've already positioned the marker at the first data point,
+                // no need to update the initial position here
             })
             .catch(error => {
                 console.error('Error playing audio:', error);
+                if (marker) marker.style.display = 'none';
             });
     } else {
         audio.addEventListener('loadeddata', () => {
             audio.play()
                 .then(() => {
-                    // Playback successful
+                    // We've already positioned the marker at the first data point
                 })
                 .catch(error => {
                     console.error('Error playing audio:', error);
+                    if (marker) marker.style.display = 'none';
                 });
         });
     }
@@ -773,6 +888,9 @@ function plotSpectrogram(data) {
                     const fetch1 = fetch("/get_sliced_audio_original", { method: "POST", body: formData });
                     const fetch2 = fetch("/get_sliced_audio_resynth", { method: "POST", body: formData1 });
 
+                    const startTime = newRange[0];
+                    const endTime = newRange[1];
+                    
                     Promise.all([fetch1, fetch2])
                     .then(responses => Promise.all(responses.map(response => response.blob())))
                     .then(blobs => {
@@ -797,17 +915,17 @@ function plotSpectrogram(data) {
                         var checkboxes = document.querySelectorAll('.js-or-re-tbtn input[type="checkbox"]')
 
                         if (checkboxes[0].checked && !checkboxes[1].checked && !checkboxes[2].checked) {
-                            playAudio(audio1);
+                            playAudio(audio1, startTime, endTime);
                         } else if (!checkboxes[0].checked && checkboxes[1].checked && !checkboxes[2].checked) {
-                            playAudio(audio2);
+                            playAudio(audio2, startTime, endTime);
                         } else if (checkboxes[0].checked && checkboxes[1].checked && !checkboxes[2].checked) {
-                            playAudio(audio1);
-                            playAudio(audio2);
+                            playAudio(audio1, startTime, endTime);
+                            playAudio(audio2, startTime, endTime);
                         } else if (checkboxes[0].checked && checkboxes[1].checked && checkboxes[2].checked) {
                             audio1.addEventListener('ended', () => {
-                                playAudio(audio2);
+                                playAudio(audio2, startTime, endTime);
                             });
-                            playAudio(audio1);
+                            playAudio(audio1, startTime, endTime);
                         }
 
                     })
