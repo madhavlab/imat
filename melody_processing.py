@@ -188,19 +188,16 @@ def calc_rpa(efv, filename, indexes, groundtruth_dir='./static/groundtruth/'):
 def support_pretrain_step(x, y, ts, meta_model_pre, inner_optimizer, inner_step):
     """Train melody extraction model on support indices."""
     print("Training melody extraction model...")
-    
+       
     with tf.device('/gpu:0'):
         for step in range(inner_step):
             with tf.GradientTape(persistent=True) as tape:
                 ys_hat, _ = meta_model_pre.call(x)
                 loss = ut.custom_loss(y, ys_hat, ts)
+                print(f"  Step {step}: loss = {loss:.4f}")
                 
             grads = tape.gradient(loss, meta_model_pre.trainable_variables)
             inner_optimizer.apply_gradients(zip(grads, meta_model_pre.trainable_variables))
-            
-            if step % 2 == 0:
-                print(f"  Step {step}: loss = {loss:.4f}")
-    
     print("Melody extraction model training complete.")
     return loss
 
@@ -212,43 +209,25 @@ def support_conftrain_step(x, y, ts, meta_model_pre, meta_model_conf, conf_inner
     ts_tensor = tf.convert_to_tensor(ts, dtype=tf.int32)
     
     with tf.device('/gpu:0'):
-        for step in range(inner_step // 2):  # Fewer steps for confidence model
+        for step in range(inner_step):
             with tf.GradientTape(persistent=True) as tape:
                 ys_hat, _ = meta_model_pre.call(x)
                 yc_hat = meta_model_conf.call(x)
                 loss = ut.conf_loss(y, ys_hat, yc_hat, ts_tensor)
-                
+                print(f"  Step {step}: loss = {loss:.4f}")
+
             grads = tape.gradient(loss, meta_model_conf.trainable_variables)
-            conf_inner_optimizer.apply_gradients(zip(grads, meta_model_conf.trainable_variables))
-            
-            if step % 2 == 0:
-                print(f"  Step {step}: confidence loss = {loss:.4f}")
-    
+            conf_inner_optimizer.apply_gradients(zip(grads, meta_model_conf.trainable_variables))    
     print("Confidence model training complete.")
     return loss
 
 
 
 def aml(S, active_frames, gfv, fileid, model, model_conf, weights_path='models/updated_weights/pre/weights'):
-    print(weights_path)
-    meta_trained_classifier = ut.melody_extraction()
-    meta_trained_classifier.build_graph([500, 513, 1])
-    
-    meta_trained_conf = ut.ConfidenceModel(meta_trained_classifier)  # Link confidence model to classifier
-    meta_trained_conf.build_graph([500, 513, 1])
-
-    for i in range(len(meta_trained_classifier.layers) - 1):
-        meta_trained_classifier.layers[i].trainable = False
-
-    meta_trained_conf.layers[0].trainable = False
-
-    
     # Calculate learning rate with decay
-    base_alpha = 1.e-3  # 5.e-5  --> only 3 times retraining
-    base_beta = 1.e-4
+    base_alpha = 5.e-5  # 5.e-5  --> only 3 times retraining
+    base_beta = 5.e-5
 
-    # base_alpha = 1.e-4
-    # base_beta = 1.e-5
     alpha = base_alpha * (0.9 ** fileid) if fileid > 0 else base_alpha
     beta = base_beta * (0.9 ** fileid) if fileid > 0 else base_beta
     
@@ -262,15 +241,40 @@ def aml(S, active_frames, gfv, fileid, model, model_conf, weights_path='models/u
     S = tf.convert_to_tensor(S)
     S = (S-ut.mean)/ut.std
     S = S[tf.newaxis, :, :, tf.newaxis]    
+
+    # Create models
+    meta_trained_classifier = ut.melody_extraction()
+    dummy_out, _ = meta_trained_classifier(S)
+    
+    # Set trainable flags - keep ONLY the final dense layers trainable
+    for layer in meta_trained_classifier.layers:
+        layer.trainable = False  # Start by making all layers non-trainable
+    
+    # Make specific layers trainable
+    # meta_trained_classifier.linear1.trainable = True
+    meta_trained_classifier.final.trainable = True
+    
+    # Create and build confidence model
+    meta_trained_conf = ut.ConfidenceModel(meta_trained_classifier)
+    _ = meta_trained_conf(S)
+    
+    # Set confidence model trainability
+    # meta_trained_conf.dense2.trainable = True
+    meta_trained_conf.final.trainable = True
+    
+    # Print diagnostics
+    print(f"File ID: {fileid}")
     
     # Load weights based on training iteration
     if fileid == 0:
         meta_trained_classifier.set_weights(model.get_weights())
         meta_trained_conf.set_weights(model_conf.get_weights())
     else:
+        print('moved to else part')
         try:
             meta_trained_classifier.load_weights(weights_path)
             meta_trained_conf.load_weights(weights_path.replace('pre', 'conf'))
+            print('models loaded')
         except Exception as e:
             print(f"Error loading weights: {e}. Using original weights.")
             meta_trained_classifier.set_weights(model.get_weights())
@@ -303,4 +307,5 @@ def aml(S, active_frames, gfv, fileid, model, model_conf, weights_path='models/u
         for i in range(yq_hat.shape[1]):
             indx = np.argmax(yq_hat[j, i, :])
             efv.append(ut.pitch_range[indx])
+
     return efv

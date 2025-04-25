@@ -59,35 +59,34 @@ hideSpinner()
 
 // Add a new function to update point colors based on selection
 function updatePointColors() {
-    // If myChart doesn't exist, return early
     if (!myChart || !myChart.data || !myChart.data.datasets || !myChart.data.datasets[0]) return;
-       
-    // Create arrays of default red color for all points
+
     const defaultColor = 'red';
     const selectedColor = 'blue';
-    const pointColors = Array(myChart.data.labels.length).fill(defaultColor);
-    
-    // Calculate base index
-    const init_index = parseFloat((newRange[0]).toFixed(2)) * 100;
-    
-    // Set selected points to blue
-    if (selectedPoints && selectedPoints.x && selectedPoints.x.length > 0) {        
+    const pointCount = myChart.data.labels.length;
+
+    // Default all to red
+    const pointColors = new Array(pointCount).fill(defaultColor);
+
+    // Update visible range index
+    const init_index = parseInt((newRange[0] * 100).toFixed());
+
+    // Color selected points blue
+    if (selectedPoints?.x?.length > 0) {
         selectedPoints.x.forEach(globalIndex => {
             const chartIndex = globalIndex - init_index;
-            if (chartIndex >= 0 && chartIndex < pointColors.length) {
+            if (chartIndex >= 0 && chartIndex < pointCount) {
                 pointColors[chartIndex] = selectedColor;
             }
         });
     }
-    
-    // Apply colors to chart
-    myChart.data.datasets[0].pointBackgroundColor = pointColors;
-    myChart.data.datasets[0].pointBorderColor = pointColors;
-    
-    // Force chart update
+
+    // Apply new colors
+    myChart.data.datasets[0].pointBackgroundColor = [...pointColors];
+    myChart.data.datasets[0].pointBorderColor = [...pointColors];
+
     myChart.update();
 }
-
 // ####################################################################################
 
 function map(value, start1, stop1, start2, stop2) {
@@ -104,74 +103,45 @@ function down_handler(event) {
 }
 
 function move_handler(event) {
-    // Calculate the base index once
-    const init_index = parseFloat((newRange[0]).toFixed(2)) * 100;
-    
     if (activePoint === null) return;
-    
-    // Get chart data references
+
+    const init_index = parseInt((newRange[0] * 100).toFixed());
     const data = activePoint._chart.data;
     const datasetIndex = activePoint._datasetIndex;
     const pointIndex = activePoint._index;
     const globalIndex = init_index + pointIndex;
-    
-    // Read mouse position and convert to chart value
+
     const position = helpers.getRelativePosition(event, myChart);
     const chartArea = myChart.chartArea;
     const yAxis = myChart.scales["y-axis-0"];
-    yValue = map(position.y, chartArea.bottom, chartArea.top, yAxis.min, yAxis.max);
-    
-    // Ensure value is not negative
-    yValue = Math.max(0, yValue);
-    
-    // Check if the point is part of a selection
-    const isInSelection = selectedPoints && 
-                         selectedPoints.x && 
-                         selectedPoints.x.length > 0 && 
-                         selectedPoints.x.includes(globalIndex);
-    
+    yValue = Math.max(0, map(position.y, chartArea.bottom, chartArea.top, yAxis.min, yAxis.max));
+
+    const isInSelection = selectedPoints?.x?.includes(globalIndex);
+
     if (isInSelection) {
-        updatePointColors();
-        // Calculate the change amount
+        updatePointColors(); // Optional: could delay this until after data update
+
         const diff = yValue - data.datasets[datasetIndex].data[pointIndex];
-        
-        // Update all selected points
-        let yIdx = 0;
-        selectedPoints.x.forEach(x => {
+        selectedPoints.x.forEach((x, idx) => {
             const chartIndex = x - init_index;
-            
-            // Skip points outside the visible range
             if (chartIndex >= 0 && chartIndex < data.datasets[datasetIndex].data.length) {
-                // Apply the same relative movement
-                data.datasets[datasetIndex].data[chartIndex] += diff;
-                data.datasets[datasetIndex].data[chartIndex] = Math.max(0, data.datasets[datasetIndex].data[chartIndex]);
-                
-                // Update selection cache
-                selectedPoints.y[yIdx] = data.datasets[datasetIndex].data[chartIndex];
-                
-                // Add to retrainPoints in real-time
-                retrainPoints[x] = selectedPoints.y[yIdx];
+                data.datasets[datasetIndex].data[chartIndex] = Math.max(0, data.datasets[datasetIndex].data[chartIndex] + diff);
+                selectedPoints.y[idx] = data.datasets[datasetIndex].data[chartIndex];
+                retrainPoints[x] = selectedPoints.y[idx];
             }
-            yIdx++;
         });
-        
-        // Add highlight for selected points
+
         updatePointColors();
     } else {
-        // Just update the active point
         data.datasets[datasetIndex].data[pointIndex] = yValue;
-        
-        // Add to retrainPoints in real-time
         retrainPoints[globalIndex] = yValue;
     }
 
-    // Update canvasData to reflect new positions
     canvasData = data.labels.map((x, idx) => ({
         x: x,
         y: data.datasets[datasetIndex].data[idx]
     }));
-    
-    // Update the chart display
+
     myChart.update();
 }
 
@@ -243,39 +213,24 @@ function up_handler(event) {
 
 // Modify handleRightClick to reset colors when selection is cleared
 function handleRightClick(event) {
-    event.preventDefault(); // Prevent the context menu from appearing
-    
-    // Clear the selection data completely
-    selectedPoints = { 'x': [], 'y': [] };
-    
-    // Reset the box visibility flag
+    event.preventDefault();
+
+    selectedPoints = { x: [], y: [] };
     boxVisible = false;
-    isDragging = false;  // Also reset the dragging state
-    
-    // Clear any visual selection box
-    if (ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    isDragging = false;
+
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (myChart) myChart.options.events = true;
+
+    if (myChart?.data?.datasets?.[0]) {
+        const resetColorArray = Array(myChart.data.labels.length).fill('red');
+        myChart.data.datasets[0].pointBackgroundColor = [...resetColorArray];
+        myChart.data.datasets[0].pointBorderColor = [...resetColorArray];
     }
-    
-    // Re-enable chart events
-    if (myChart) {
-        myChart.options.events = true;
-    }
-    
-    // Reset point colors to default
-    if (myChart && myChart.data && myChart.data.datasets && myChart.data.datasets[0]) {
-        const defaultColor = 'red';
-        myChart.data.datasets[0].pointBackgroundColor = Array(myChart.data.labels.length).fill(defaultColor);
-        myChart.data.datasets[0].pointBorderColor = Array(myChart.data.labels.length).fill(defaultColor);
-    }
-    
-    // Log to confirm selection has been cleared
+
     console.log('Selection cleared by right-click');
-    
-    // Update the chart to refresh the display
     myChart.update();
 }
-
 
 function renderSelectionBox() {
     const x = Math.min(selectionStart.x, selectionEnd.x);
@@ -305,24 +260,24 @@ function getPointsInsideSelectionBox() {
 }
 
 function adjustSelectedPoints() {
-    var temp = getPointsInsideSelectionBox();
-    selectedPoints['x'] = [];
-    selectedPoints['y'] = [];
-    // Group the data based on the key values
+    const temp = getPointsInsideSelectionBox();
+    const init_index = parseInt((newRange[0] * 100).toFixed());
+
+    selectedPoints.x = [];
+    selectedPoints.y = [];
+
     temp.forEach(item => {
-      selectedPoints['x'].push(Math.round(item['x']*100));
-      selectedPoints['y'].push(item['y']);
+        const globalX = Math.round(item.x * 100);  // Global X index
+        selectedPoints.x.push(globalX);
+        selectedPoints.y.push(item.y);
     });
 
-    console.log('Points selected in rectangle:', 
-        {
-            indexes: [...selectedPoints.x], 
-            values: [...selectedPoints.y],
-            count: selectedPoints.x.length
-        }
-    );
-    
-    // Update point colors to show selection
+    console.log('Points selected in rectangle:', {
+        indexes: [...selectedPoints.x],
+        values: [...selectedPoints.y],
+        count: selectedPoints.x.length
+    });
+
     updatePointColors();
 }
 
@@ -730,131 +685,136 @@ function plotSpectrogram(data) {
     });
 
     document.querySelector('.annotate-btn')
-        .addEventListener("click",function(){
-            if (!checkbox.checked){
-                alert('Show Melody!')
-            } else {
+    .addEventListener("click", function() {
+        if (!checkbox.checked) {
+            alert('Show Melody!')
+        } else {
+            showSpinner("")
 
-                showSpinner("")
-
-                if (newRange === undefined) {
-                    newRange = [-1*(originalRange._fullLayout.xaxis.range[0]*0),originalRange._fullLayout.xaxis.range[1]]
-                    newRange = [parseFloat(newRange[0].toFixed(2)),newRange[1]]
+            // Fix for undefined newRange
+            if (newRange === undefined || newRange === null) {
+                // Get the default range from the spectrogram
+                if (originalRange && originalRange._fullLayout && originalRange._fullLayout.xaxis) {
+                    newRange = [0, originalRange._fullLayout.xaxis.range[1]];
+                } else {
+                    // Fallback if nothing else is available
+                    newRange = [0, Math.max(...melody_trace.x)];
                 }
-               
-                xValuesRange = melody_trace.x.filter(value => value >= newRange[0] && value <= newRange[1])
-                xValuesRangeLength = xValuesRange.length
-                const filteredYValues = xValuesRange.map(x => {
-                    const index = melody_trace.x.indexOf(x);
-                    return melody_trace.y[index]
-                })
-
-                const layout1 = {
-                    autosize: true,
-                    xaxis: {range: newRange,
-                            fixedrange:true,
-                            visible: false,
-                            },
-                    yaxis: {
-                            autorange: true,
-                            range: [0,4000],
-                            visible: false,
-                            },                            
-                    hovermode: null,  
-                    }
-                const zoom_trace = [trace];                    
-                const config = {responsive: false};
-
-                Plotly.newPlot('js-display-zoom-spectrogram-melody',zoom_trace,layout1,config)   
-                hideSpinner("") 
-
-                var confValues = getConfValues(xValuesRange.length)                
-
-                updateChart(xValuesRange,filteredYValues)
-
-                document.querySelector('.js-or-re-tbtn')
-                    .innerHTML = `
-                                    <label class="switch" id="js-or-switch"><input type="checkbox" checked> Include Original Audio <label for="volumeSliderOr"></label>
-                                    <input type="range" id="volumeSliderOr" min="0" max="1" step="0.1" value="1"> 
-                                    <label class="switch" id="js-re-switch"><input type="checkbox" checked> Include Resynthesize Audio <label for="volumeSliderRe" ></label>
-                                    <input type="range" id="volumeSliderRe" min="0" max="1" step="0.1" value="1"> 
-                                    <label class="switch" id="js-bo-switch"><input type="checkbox"> Include both serially </label>                             
-                                        `
-
-                document.querySelector('.js-play-btn')
-                    .innerHTML = `<button class="play-button">Play</button>`
-                document.querySelector('.js-remove-btn')
-                    .innerHTML = `<button class="remove-button">Remove pitches</button>`
-                document.querySelector('.js-retrain-btn')
-                    .innerHTML = `<button class="retrain-button">Retrain model</button>`
-
-
-                document.querySelector('.js-play-btn')
-                    .addEventListener("click",function(){
-                        const volumeSliderOr = document.getElementById('volumeSliderOr');
-                        const volumeSliderRe = document.getElementById('volumeSliderRe');
-                        // Store last used volume
-                        let lastVolumeOr = volumeSliderOr.value;
-                        let lastVolumeRe = volumeSliderRe.value;
-
-                        const formData = new FormData()
-                        formData.append('file',selectedFile)
-                        formData.append('start_time',newRange[0])
-                        formData.append('end_time',newRange[1])
-                        
-                        const formData1 = new FormData()
-                        formData1.append('file',selectedFile)
-                        formData1.append('array',JSON.stringify({data: melody_trace.y}))
-                        formData1.append('start_time',newRange[0])
-                        formData1.append('end_time',newRange[1])
-
-                        const fetch1 = fetch("/get_sliced_audio_original", { method: "POST", body: formData });
-                        const fetch2 = fetch("/get_sliced_audio_resynth", { method: "POST", body: formData1 });
-
-                        Promise.all([fetch1, fetch2])
-                        .then(responses => Promise.all(responses.map(response => response.blob())))
-                        .then(blobs => {
-                            const audio1 = new Audio(URL.createObjectURL(blobs[0]));
-                            const audio2 = new Audio(URL.createObjectURL(blobs[1]));
-
-                            // Set volume to last used value
-                            audio1.volume = lastVolumeOr;
-                            audio2.volume = lastVolumeRe;
-
-                            // Event listener for volume slider change for Original Audio
-                            volumeSliderOr.addEventListener('input', function () {
-                                audio1.volume = volumeSliderOr.value;
-                            });
-
-                            // Event listener for volume slider change for Resynthesize Audio
-                            volumeSliderRe.addEventListener('input', function () {
-                                audio2.volume = volumeSliderRe.value;
-                            });
-
-                            
-                            var checkboxes = document.querySelectorAll('.js-or-re-tbtn input[type="checkbox"]')
-
-                            if (checkboxes[0].checked && !checkboxes[1].checked && !checkboxes[2].checked) {
-                                playAudio(audio1);
-                            } else if (!checkboxes[0].checked && checkboxes[1].checked && !checkboxes[2].checked) {
-                                playAudio(audio2);
-                            } else if (checkboxes[0].checked && checkboxes[1].checked && !checkboxes[2].checked) {
-                                playAudio(audio1);
-                                playAudio(audio2);
-                            } else if (checkboxes[0].checked && checkboxes[1].checked && checkboxes[2].checked) {
-                                audio1.addEventListener('ended', () => {
-                                    playAudio(audio2);
-                                });
-                                playAudio(audio1);
-                            }
-
-                        })
-                        updateChart(xValuesRange,filteredYValues)
-                                            
-                    }) 
-            
+                newRange = [parseFloat(newRange[0].toFixed(2)), newRange[1]];
+                console.log("Using default range:", newRange);
             }
+           
+            xValuesRange = melody_trace.x.filter(value => value >= newRange[0] && value <= newRange[1])
+            xValuesRangeLength = xValuesRange.length
+            const filteredYValues = xValuesRange.map(x => {
+                const index = melody_trace.x.indexOf(x);
+                return melody_trace.y[index]
+            })
 
+            const layout1 = {
+                autosize: true,
+                xaxis: {range: newRange,
+                        fixedrange: true,
+                        visible: false,
+                        },
+                yaxis: {
+                        autorange: true,
+                        range: [0, 4000],
+                        visible: false,
+                        },                            
+                hovermode: null,  
+                }
+            const zoom_trace = [trace];                    
+            const config = {responsive: false};
+
+            Plotly.newPlot('js-display-zoom-spectrogram-melody', zoom_trace, layout1, config)   
+            hideSpinner("") 
+
+            var confValues = getConfValues(xValuesRange.length)                
+
+            updateChart(xValuesRange, filteredYValues)
+
+            document.querySelector('.js-or-re-tbtn')
+                .innerHTML = `
+                                <label class="switch" id="js-or-switch"><input type="checkbox" checked> Include Original Audio <label for="volumeSliderOr"></label>
+                                <input type="range" id="volumeSliderOr" min="0" max="1" step="0.1" value="1"> 
+                                <label class="switch" id="js-re-switch"><input type="checkbox" checked> Include Resynthesize Audio <label for="volumeSliderRe" ></label>
+                                <input type="range" id="volumeSliderRe" min="0" max="1" step="0.1" value="1"> 
+                                <label class="switch" id="js-bo-switch"><input type="checkbox"> Include both serially </label>                             
+                                    `
+
+            document.querySelector('.js-play-btn')
+                .innerHTML = `<button class="play-button">Play</button>`
+            document.querySelector('.js-remove-btn')
+                .innerHTML = `<button class="remove-button">Remove pitches</button>`
+            document.querySelector('.js-retrain-btn')
+                .innerHTML = `<button class="retrain-button">Retrain model</button>`
+
+
+            document.querySelector('.js-play-btn')
+                .addEventListener("click", function() {
+                    const volumeSliderOr = document.getElementById('volumeSliderOr');
+                    const volumeSliderRe = document.getElementById('volumeSliderRe');
+                    // Store last used volume
+                    let lastVolumeOr = volumeSliderOr.value;
+                    let lastVolumeRe = volumeSliderRe.value;
+
+                    const formData = new FormData()
+                    formData.append('file', selectedFile)
+                    formData.append('start_time', newRange[0])
+                    formData.append('end_time', newRange[1])
+                    
+                    const formData1 = new FormData()
+                    formData1.append('file', selectedFile)
+                    formData1.append('array', JSON.stringify({data: melody_trace.y}))
+                    formData1.append('start_time', newRange[0])
+                    formData1.append('end_time', newRange[1])
+
+                    const fetch1 = fetch("/get_sliced_audio_original", { method: "POST", body: formData });
+                    const fetch2 = fetch("/get_sliced_audio_resynth", { method: "POST", body: formData1 });
+
+                    Promise.all([fetch1, fetch2])
+                    .then(responses => Promise.all(responses.map(response => response.blob())))
+                    .then(blobs => {
+                        const audio1 = new Audio(URL.createObjectURL(blobs[0]));
+                        const audio2 = new Audio(URL.createObjectURL(blobs[1]));
+
+                        // Set volume to last used value
+                        audio1.volume = lastVolumeOr;
+                        audio2.volume = lastVolumeRe;
+
+                        // Event listener for volume slider change for Original Audio
+                        volumeSliderOr.addEventListener('input', function () {
+                            audio1.volume = volumeSliderOr.value;
+                        });
+
+                        // Event listener for volume slider change for Resynthesize Audio
+                        volumeSliderRe.addEventListener('input', function () {
+                            audio2.volume = volumeSliderRe.value;
+                        });
+
+                        
+                        var checkboxes = document.querySelectorAll('.js-or-re-tbtn input[type="checkbox"]')
+
+                        if (checkboxes[0].checked && !checkboxes[1].checked && !checkboxes[2].checked) {
+                            playAudio(audio1);
+                        } else if (!checkboxes[0].checked && checkboxes[1].checked && !checkboxes[2].checked) {
+                            playAudio(audio2);
+                        } else if (checkboxes[0].checked && checkboxes[1].checked && !checkboxes[2].checked) {
+                            playAudio(audio1);
+                            playAudio(audio2);
+                        } else if (checkboxes[0].checked && checkboxes[1].checked && checkboxes[2].checked) {
+                            audio1.addEventListener('ended', () => {
+                                playAudio(audio2);
+                            });
+                            playAudio(audio1);
+                        }
+
+                    })
+                    updateChart(xValuesRange, filteredYValues)
+                                        
+                }) 
+        }
             document.querySelector('.js-retrain-btn')
                 .addEventListener("click",retrainModel)
 
