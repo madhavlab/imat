@@ -203,7 +203,7 @@ def get_sliced_audio_resynth():
         y_resynth = mp.pitch2wav(f_new, t_new)
         
         # Generate a unique filename to avoid conflicts
-        resynth_filename = f"resynth_{int(time.time())}_{filename}"
+        resynth_filename = f"resynth_{filename}"
         resynth_path = os.path.join(resynthwavfileDir, resynth_filename)
         
         # Write full audio
