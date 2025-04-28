@@ -21,7 +21,7 @@ How to setup the tool?
 
 ## Tool Manual
 - On the terminal, activate the new environment and run the Python script - 'app.py'.
-- After executing 'app.py', copy the link that appears on the terminal and open it on the browser, or press Ctrl+link to open it directly on the browser. The link should look like this - <ins>Running on</ins> http://127.0.0.1:3000
+- After executing 'app.py', copy the link that appears on the terminal and open it on the browser, or press Ctrl+link to open it directly on the browser. The link should look like this - <ins>Running on</ins> http://127.0.0.1:[port_number]
   
 - **STEP 1:** Click on the 'Upload audio' button and browse through your system to annotate the audio you wish. Please make sure you upload a '.wav' audio file. The maximum duration allowed for the audio is 60 seconds.
 - **STEP 2:** Once the audio is uploaded, click on the 'Show Spectrogram' button to visualize the spectrogram.
