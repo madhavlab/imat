@@ -1,18 +1,22 @@
 # IMAT - Interactive Melody Annotation Tool
 
 ## Overview
-IMAT is a tool designed to correct singing melodies obtained from machine-learning melody estimation algorithms. 
-
+IMAT is a tool designed to reduce the annotation time and effort when singing melodies are obtained from machine learning-based melody estimation algorithms. The tool uses active learning to highlight a few regions in the audio using a confidence criterion to be corrected by the user via visual and auditory feedback. It subsequently adapts to these corrections using meta-learning, thus providing a more precise melody annotation of the entire audio, thereby expediting the correction process.
 
 ## Usage
 How to setup the tool?
 
 **Prerequisites**
-- Clone this repository on your local system and setup environment
+- Clone this repository on your local system and setup the environment
   ```
       git clone https://github.com/madhavlab/imat_taslp.git
       cd imat_taslp
-      python3 requirement.txt
+  ```
+- Create a new environment to run the tool
+  ```
+    conda create -n [env_name] python=3.11.0
+    conda activate [env_name]
+    python3 -m pip install --user -r requirements.txt
   ```
 
 ## Tool Manual
