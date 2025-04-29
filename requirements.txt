@@ -1,0 +1,33 @@
+# Core dependencies
+Flask==2.3.2
+numpy==1.23.5
+librosa==0.10.0.post2
+mir-eval==0.7
+scipy==1.10.1
+scikit-learn==1.2.2
+soundfile==0.12.1
+
+# TensorFlow - will work on both CPU and GPU systems
+# Users with GPUs will automatically get GPU support
+python==3.11.0
+tensorflow==2.12.0
+
+# Supporting packages for audio processing
+audioread==3.0.0
+soxr==0.3.5
+pooch==1.6.0
+numba==0.57.0
+
+# Flask dependencies
+Jinja2==3.1.2
+MarkupSafe==2.1.2
+Werkzeug==2.3.3
+itsdangerous==2.1.2
+blinker==1.6.2
+click==8.1.3
+
+# Optional: For users with NVIDIA GPUs, they may need these
+# (will be ignored on CPU-only systems)
+# These are downloaded automatically if the GPU is available
+# cuda-toolkit  # Comment out as this is system-dependent
+# cudnn  # Comment out as this is system-dependent
