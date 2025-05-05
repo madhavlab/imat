@@ -22,7 +22,8 @@ bibliography: paper.bib
 # Summary
 Estimating singing melody from polyphonic audio is a fundamental and important task in the field of music information retrieval. There are many downstream applications of melody estimation, including music recommendation[(`@mr`)](https://ieeexplore.ieee.org/document/9414458), cover song identification[(`@cvi`)](https://ieeexplore.ieee.org/document/9747630), music generation[(`@mg`)](https://archives.ismir.net/ismir2020/paper/000146.pdf), and voice separation[(`@vs`)](https://ieeexplore.ieee.org/document/7178034). In order to achieve high performance in the downstream applications, the estimated melody should be highly accurate. There are both signal processing[(`@sp1`)](https://repositori-api.upf.edu/api/core/bitstreams/1864c4d1-2c39-4474-9578-4da95d30f391/content)[(`@sp2`)](https://ieeexplore.ieee.org/document/5431024), and machine learning-based[(`@ml1`)](https://archives.ismir.net/ismir2018/paper/000286.pdf)[(`@ml2`)](https://brianmcfee.net/papers/ismir2017_salience.pdf) algorithms for estimating the melody from the polyphonic audios. The drawback of these methods is that the estimated melody may be inaccurate. The inaccuracies can be caused by the presence of loud accompaniments, inherent noise in the audio, or model inaccuracies. The user must correct the inaccurately estimated melody to make it suitable for downstream applications. One way of correcting the melody is by manual annotation, which is time-consuming and labor-intensive, creating a need for more efficient approaches.
 
-In this work, we have developed IMAT, an interactive tool that uses our previously proposed model-agnostic machine-learning-based algorithm, i.e., active-meta-learning[(`@aml`)](https://ieeexplore.ieee.org/abstract/document/10530096) that combines active-learning[(`@al`)](https://dl.acm.org/doi/pdf/10.1145/3472291) and meta-learning[(`@maml`)](https://proceedings.mlr.press/v70/finn17a/finn17a.pdf) to efficiently annotate the singing melody. When audio is given as an input to IMAT, the corresponding spectrogram is calculated and the algorithm uses active learning to identify the low-confidence time frames. These frames are available for the user to correct by manual annotation which can be aided by both visual and auditory feedback. The algorithm then adapts to these corrections using meta-learning, thus providing a more precise melody annotation of the entire audio. This process, referred to as adaptive annotation
+In this work, we have developed IMAT, an interactive tool that uses our previously proposed model-agnostic machine-learning-based algorithm, i.e., active-meta-learning[(`@aml`)](https://ieeexplore.ieee.org/abstract/document/10530096) that combines active-learning[(`@al`)](https://dl.acm.org/doi/pdf/10.1145/3472291) and meta-learning[(`@maml`)](https://proceedings.mlr.press/v70/finn17a/finn17a.pdf) to efficiently annotate the singing melody. When audio is given as an input to IMAT, the corresponding spectrogram is calculated and the algorithm uses active learning to identify the low-confidence time frames. These frames are available for the user to correct by manual annotation which can be aided by both visual and auditory feedback. The algorithm then adapts to these corrections using meta-learning, thus providing a more precise melody annotation of the entire audio. This process, referred to as adaptive annotation, allows users to to perform melody annotation by significantly reducing manual effort compared to traditional approaches.
+
 
 # Statement of Need
 Existing annotation tools fall into two main categories: 
@@ -41,8 +42,22 @@ IMAT addresses these limitations by:
 
 
 # Software Description
-IMAT is developed using the Python FLASK framework for the back-end with the front-end components built using JavaScript, HTML, and CSS. The tool can operate efficiently on a CPU and does not necessitate the use of a GPU. It provides a user-friendly interface for loading audio file, visualizing the spectrogram, and perform adaptive annotation. The step-wise annotation process for a single audio is shown in Figure 1.
+## Architecture Overview
+IMAT is developed using the Python FLASK framework for the back-end with the front-end components built using JavaScript, HTML, and CSS. The tool can operate efficiently on a CPU and does not necessitate the use of a GPU. It provides a user-friendly interface for loading audio file, visualizing the spectrogram, and perform adaptive annotation. The tool consists of the following main components: 
 
+1. Pre-processing Module: Converts the uploaded audio files (.wav) into spectrogram (of shape $F\times T$, $F$ are the number of frequnecy bins and $T$ are the number of time frames) and extracts initial melody estimates with the uncertainty estimates using the *pluggable* machine learning model.
+2. Annotation Module: Identifies low-confidence frames that require user annotation and adapts the melody estimation model based on user corrections.
+
+## Pre-processing Module
+The uploaded audio is converted to a spectrogram which serves as input to our model archiecture. The base model $f_{[\theta,\phi]}$ consists of two components: feature extraction layers parameterized by $\theta$ and classification layer parameterized by $\phi$. 
+
+Additionally, a confidence model $f_{psi}$ is built on top of the feature extraction layers of the base model. This confidence estimation is crucial for the active learning component, allowing the system to identify which predictions require user verification. 
+
+## Annotation Module
+After obtaining the melody estimates and confidence values, the system highlights low-confidence time frames in the visualization interface. Users can focus on these highlighted sections and make corrections through an intuitive interface. Using meta-learning, the system then adapts both the base model $f_{[\theta,\phi]}$ and confidence model $f_{\psi}$ based on these corrections, immediately updating melody estimates and confidence values across the entire spectrogram. This approach only requires correcting a small subset of frames, as the system generalizes these corrections to similar contexts throughout the audio, optimizing both annotation accuracy and efficiency.
+
+
+The workflow of the tool is depicted in Figure 1. 
 ![Figure 1: Step-wise annotation process for a single audio using IMAT.](figures/interface.jpg)
 Figure 1. IMAT Interface: (a) user uploads any .wav audio file, (b) user visualizes the uploaded audio waveform, (c) user visualizes the corresponding spectrogram overlayed with estimated melody and zooms into a particular time range, (d) user corrects the incorrect melody anchor points corresponding to low confidence frames by manual annotation (in that time range).
 
