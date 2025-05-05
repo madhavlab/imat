@@ -42,7 +42,14 @@ How to setup the tool?
 
 
 ## How to integrate different ML models?
-IMAT natively uses two separate models (melody estimation and confidence). The researchers may use the same architecture or a single model that predicts both melody estimates and corresponding confidence. 
+IMAT natively uses two separate models - one for melody estimation and another for confidence. Researchers may use either of the following approaches:
+1. Separate Models Approach - Same architecture but with different melody estimation and confidence models. 
+2. Single Model Approach - A single model that predicts both melody estimates and corresponding confidence. 
+
+The researchers need to follow the following steps to integrate the models:
+
+1. When using separate models - To integrate your custom melody and confidence estimation models:<br>
+&nbsp;&nbsp;&nbsp;&nbsp; Replace the custom melody and confidence models in the ***utils.py*** file. Do not forget to return  
 
 
 ## Citation
