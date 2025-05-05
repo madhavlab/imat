@@ -49,7 +49,7 @@ IMAT natively uses two separate models - one for melody estimation and another f
 The researchers need to follow the following steps to integrate the models:
 
 1. When using separate models - To integrate your custom melody and confidence estimation models:<br>
-&nbsp;&nbsp;&nbsp;&nbsp; Replace the custom melody and confidence models in the ***utils.py*** file. Do not forget to return  
+&nbsp;&nbsp;&nbsp;&nbsp; Replace the custom melody and confidence models in the ***utils.py*** file. Do not forget to return the same variables as mentioned.  
 
 
 ## Citation
