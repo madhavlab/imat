@@ -36,9 +36,19 @@ A point to note is that both the tools use signal processing algorithms for esti
 
 
 IMAT addresses these limitations by:
-1. Adaptive Annotation: The tool learns from user corrections using meta-learning, improving overall accuracy by reducing manual effort.
-2. Uncertainty Estimation: Active-learning identifies low-confidence frames requiring user attention, optimzing the annotation workflow.
-3. Model-agnostic Approach: IMAT implements a flexible, model-agnostic framework compatible with any machine learning model that treats melody estimations as a multi-class classification problem with uncertainty estimation capabilities. This plugin architecture seemleassly integrate custom models without modifying the underlying codebase. 
+1. **Adaptive Annotation:** The tool learns from user corrections using meta-learning, improving overall accuracy by reducing manual effort.
+2. **Uncertainty Estimation:** Active-learning identifies low-confidence frames requiring user attention, optimzing the annotation workflow.
+3. **Model-agnostic Approach:** IMAT implements a flexible, model-agnostic framework compatible with any machine learning model that treats melody estimations as a multi-class classification problem with uncertainty estimation capabilities. This plugin architecture seemleassly integrate custom models without modifying the underlying codebase. 
 
 
-#
+# IMAT Pluggable Architecture: Interchangeable ML Models for Melody Estimation
+
+
+
+# Software Description
+IMAT is developed using the Python FLASK framework for the back-end with the front-end components built using JavaScript, HTML, and CSS. The tool can operate efficiently on a CPU and does not necessitate the use of a GPU. It provides a user-friendly interface for loading audio file, visualizing the spectrogram, and perform adaptive annotation. The step-wise annotation process for a single audio is shown in Figure 1.
+
+![Figure 1: Step-wise annotation process for a single audio using IMAT.](figures/interface.jpg)
+Figure 1. IMAT Interface: (a) user uploads any .wav audio file, (b) user visualizes the uploaded audio waveform, (c) user visualizes the corresponding spectrogram overlayed with estimated melody and zooms into a particular time range, (d) user corrects the incorrect melody anchor points corresponding to low confidence frames by manual annotation (in that time range).
+
+Installation and usage instructions are detailed in the README.md file of the [project repository](https://github.com/madhavlab/imat_taslp).
