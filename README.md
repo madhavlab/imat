@@ -1,7 +1,7 @@
 # IMAT - Interactive Melody Annotation Tool
 
 ## Overview
-IMAT is a tool designed to reduce the annotation time and effort when singing melodies are obtained from machine learning-based melody estimation algorithms. The tool uses active learning to highlight a few regions in the audio using a confidence criterion to be corrected by the user via visual and auditory feedback. It subsequently adapts to these corrections using meta-learning, thus providing a more precise melody annotation of the entire audio, thereby expediting the correction process.
+IMAT is a tool designed that uses our previously proposed model-agnostic machine-learning-based algorithm, i.e., active-meta-learning, that combines active-learning and meta-learning to efficiently annotate the singing melody obtained from machine learning-based melody estimation algorithms. The tool uses active learning to highlight a few regions in the audio using a confidence criterion to be corrected by the user via visual and auditory feedback. It subsequently adapts to these corrections using meta-learning, thus providing a more precise melody annotation of the entire audio, thereby expediting the correction process.
 
 ## Usage
 How to setup the tool?
@@ -40,18 +40,16 @@ How to setup the tool?
 
 **Follow the same procedure to annotate any polyphonic audio.**
 
+
+## How to integrate different ML models?
+IMAT natively uses two separate models (melody estimation and confidence). The researchers may use the same architecture or a single model that predicts both melody estimates and corresponding confidence. 
+
+
 ## Citation
 If you use IMAT for annotating the polyphonic audios, please cite us
 ```
   *citation*
 ```
-
-## Annotated Dataset
-The **FMA-small-subset** folder consists of three subfolders - _**audio**_, _**praat_pitch**_  and _**imat_annotated_pitch**_.
-- **audio**: Consists of 50 .wav audio files, each of 30 seconds duration.
-- **praat_pitch**: Contains the corresponding ground truth .csv pitch files obtained from PRAAT on the vocal track of each audio file (separated after applying demucs).
-- **imat_annotated_pitch**: Consists of the corresponding melody .csv pitch files annoated by IMAT.
-  
 
 ## Contact
 For any questions or feedback, please contact:
