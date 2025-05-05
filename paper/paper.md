@@ -20,9 +20,9 @@ bibliography: paper.bib
 ---
 
 # Summary
-Estimating singing melody from polyphonic audio is a fundamental and important task in the field of music information retrieval. There are many downstream applications of melody estimation, including music recommendation[[`@mr`]](https://ieeexplore.ieee.org/document/9414458), cover song identification[[`@cvi`]](https://ieeexplore.ieee.org/document/9747630), music generation[[`@mg`]](https://archives.ismir.net/ismir2020/paper/000146.pdf), and voice separation[[`@vs`]](https://ieeexplore.ieee.org/document/7178034). In order to achieve high performance in the downstream applications, the estimated melody should be highly accurate. There are both signal processing[[`@sp1`]](https://repositori-api.upf.edu/api/core/bitstreams/1864c4d1-2c39-4474-9578-4da95d30f391/content)[[`@sp2`]](https://ieeexplore.ieee.org/document/5431024), and machine learning-based[[`@ml1`]](https://archives.ismir.net/ismir2018/paper/000286.pdf)[[`@ml2`]](https://brianmcfee.net/papers/ismir2017_salience.pdf) algorithms for estimating the melody from the polyphonic audios. The drawback of these methods is that the estimated melody may be inaccurate. The inaccuracies can be caused by the presence of loud accompaniments, inherent noise in the audio, or model inaccuracies. The user must correct the inaccurately estimated melody to make it suitable for downstream applications. One way of correcting the melody is by manual annotation, which is time-consuming and labor-intensive, creating a need for more efficient approaches.
+Estimating singing melody from polyphonic audio is a fundamental and important task in the field of music information retrieval. There are many downstream applications of melody estimation, including music recommendation[(`@mr`)](https://ieeexplore.ieee.org/document/9414458), cover song identification[(`@cvi`)](https://ieeexplore.ieee.org/document/9747630), music generation[(`@mg`)](https://archives.ismir.net/ismir2020/paper/000146.pdf), and voice separation[(`@vs`)](https://ieeexplore.ieee.org/document/7178034). In order to achieve high performance in the downstream applications, the estimated melody should be highly accurate. There are both signal processing[(`@sp1`)](https://repositori-api.upf.edu/api/core/bitstreams/1864c4d1-2c39-4474-9578-4da95d30f391/content)[(`@sp2`)](https://ieeexplore.ieee.org/document/5431024), and machine learning-based[(`@ml1`)](https://archives.ismir.net/ismir2018/paper/000286.pdf)[(`@ml2`)](https://brianmcfee.net/papers/ismir2017_salience.pdf) algorithms for estimating the melody from the polyphonic audios. The drawback of these methods is that the estimated melody may be inaccurate. The inaccuracies can be caused by the presence of loud accompaniments, inherent noise in the audio, or model inaccuracies. The user must correct the inaccurately estimated melody to make it suitable for downstream applications. One way of correcting the melody is by manual annotation, which is time-consuming and labor-intensive, creating a need for more efficient approaches.
 
-In this work, we have developed IMAT, an interactive tool that uses our previously proposed model-agnostic machine-learning-based algorithm, i.e., active-meta-learning~\cite{saxena2024} that combines active-learning[[`@al`]](https://dl.acm.org/doi/pdf/10.1145/3472291) and meta-learning[[`@maml`]](https://proceedings.mlr.press/v70/finn17a/finn17a.pdf) to efficiently annotate the singing melody. When audio is given as an input to IMAT, the corresponding spectrogram is calculated and the algorithm uses active learning to identify the low-confidence time frames. These frames are available for the user to correct by manual annotation which can be aided by both visual and auditory feedback. The algorithm then adapts to these corrections using meta-learning, thus providing a more precise melody annotation of the entire audio. This process, referred to as adaptive annotation
+In this work, we have developed IMAT, an interactive tool that uses our previously proposed model-agnostic machine-learning-based algorithm, i.e., active-meta-learning[(`@aml`)](https://ieeexplore.ieee.org/abstract/document/10530096) that combines active-learning[(`@al`)](https://dl.acm.org/doi/pdf/10.1145/3472291) and meta-learning[(`@maml`)](https://proceedings.mlr.press/v70/finn17a/finn17a.pdf) to efficiently annotate the singing melody. When audio is given as an input to IMAT, the corresponding spectrogram is calculated and the algorithm uses active learning to identify the low-confidence time frames. These frames are available for the user to correct by manual annotation which can be aided by both visual and auditory feedback. The algorithm then adapts to these corrections using meta-learning, thus providing a more precise melody annotation of the entire audio. This process, referred to as adaptive annotation
 
 # Statement of Need
 Existing annotation tools fall into two main categories: 
@@ -32,17 +32,12 @@ Existing annotation tools fall into two main categories:
 A point to note is that both the tools use signal processing algorithms for estimating melody. However, these tools have significant limitations:
 1. Both the tools require extensive manual annotation, which is time consuming and labor-intensive.
 2. They lack uncertainty estimation capabilities to identify regions most likely needing correction and hence do not adapt to the user corrections.
-3. Both the tools exhibit strong coupling between their interfaces and underlying algorithms, lacking the modular architecture necessary to integrate alternative approaches without extensive code modifications.
-
+3. Both the tools exhibit strong coupling between their interfaces and underlying algorithms, lacking the modular architecture necessary to integrate alternative approaches without extensive code modifications. 
 
 IMAT addresses these limitations by:
 1. **Adaptive Annotation:** The tool learns from user corrections using meta-learning, improving overall accuracy by reducing manual effort.
 2. **Uncertainty Estimation:** Active-learning identifies low-confidence frames requiring user attention, optimzing the annotation workflow.
 3. **Model-agnostic Approach:** IMAT implements a flexible, model-agnostic framework compatible with any machine learning model that treats melody estimations as a multi-class classification problem with uncertainty estimation capabilities. This plugin architecture seemleassly integrate custom models without modifying the underlying codebase. 
-
-
-# IMAT Pluggable Architecture: Interchangeable ML Models for Melody Estimation
-
 
 
 # Software Description
@@ -51,4 +46,13 @@ IMAT is developed using the Python FLASK framework for the back-end with the fro
 ![Figure 1: Step-wise annotation process for a single audio using IMAT.](figures/interface.jpg)
 Figure 1. IMAT Interface: (a) user uploads any .wav audio file, (b) user visualizes the uploaded audio waveform, (c) user visualizes the corresponding spectrogram overlayed with estimated melody and zooms into a particular time range, (d) user corrects the incorrect melody anchor points corresponding to low confidence frames by manual annotation (in that time range).
 
-Installation and usage instructions are detailed in the README.md file of the [project repository](https://github.com/madhavlab/imat_taslp).
+The README.md file of the [project repository](https://github.com/madhavlab/imat_taslp) consists of-
+- Detailed installation and usage instructions
+- Details of how different ML models can be integrated with IMAT.
+
+
+# Acknowledgements
+
+We acknowledge contributions from Saransh Shivhare during the development of this tool.
+
+# References
