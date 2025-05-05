@@ -126,6 +126,42 @@ model.build_graph([500, 513, 1])
 model.load_weights('./models/single_model/weights')
 ```
 
+In *melody_processing.py*, modify the processing functions as
+
+```
+# Modify these functions in melody_processing.py
+
+def get_melody_json(model, X):
+    """Extract melody from spectrogram using unified model."""
+    X = np.expand_dims(X, axis=0)
+    X = (X - mean) / std
+    X = X[:, :, :, np.newaxis]
+    
+    # Get predictions from single model
+    pred, _ = model(X)  # melody, confidence
+    pred = pred.numpy()
+    
+    # Process predictions to get frequencies
+    pred_freq = []
+    for i in range(pred.shape[1]):
+        idx = np.argmax(pred[0, i, :])
+        freq = pitch_range[idx]
+        pred_freq.append(freq)
+    
+    t = np.arange(0, len(pred_freq) * 0.01, 0.01)
+    return {"t": t.tolist(), "f": pred_freq}
+
+def conf_values(model, X):
+    """Get confidence values from unified model."""
+    X = np.expand_dims(X, axis=0)
+    X = (X - mean) / std
+    X = X[:, :, :, np.newaxis]
+    
+    # Get prediction with confidence values
+    _, conf = model(X)
+    return conf
+```
+
 ## Citation
 If you use IMAT for annotating the polyphonic audios, please cite us
 ```
