@@ -49,8 +49,82 @@ IMAT natively uses two separate models - one for melody estimation and another f
 The researchers need to follow the following steps to integrate the models:
 
 1. When using separate models - To integrate your custom melody and confidence estimation models:<br>
-&nbsp;&nbsp;&nbsp;&nbsp; Replace the custom melody and confidence models in the ***utils.py*** file. Do not forget to return the same variables as mentioned.  
+   Replace the melody and confidence models in the **utils.py** file with your custom models as shown. 
 
+   ```
+   class melody_extraction(Model):
+    """CNN model for melody extraction."""
+    def __init__(self):
+        super().__init__()
+        <---initialize layers>
+
+    def call(self, x):
+        <---model layers--->
+        int_output = second_last_layer_model(x)
+        x = last_layer_of_model(int_output)
+        return x, int_output
+
+    def build_graph(self, raw_shape):
+        x = Input(shape=raw_shape)
+        return Model(inputs=[x], outputs=self.call(x))
+
+   class ConfidenceModel(Model):
+      """Model for confidence estimation."""
+      def __init__(self, pretrain_model=None):
+        self.pretrain = pretrain_model
+        <---initialize layers of confidence model--->
+
+      def call(self, x):
+        _,x = self.pretrain(x) # get intermediate features from the melody estimation model
+        <---model layers--->
+        x = last_layer_of_confidence_model(x)
+        return x
+
+      def build_graph(self, raw_shape):
+          x = Input(shape=raw_shape)
+          return Model(inputs=[x], outputs=self.call(x))
+
+   ```  
+**Important notes:**
+- The melody estimation model must return both predictions and intermediate features.
+- The confidence model should take the melody model as input and use its features to predict the confidence values.
+- Both models must maintain the expected input/output shapes for compatibility with IMAT's processing pipeline.
+
+2. When using a single model - To integrate a single model that predicts both melody and confidence:<br>
+Need to make changes in the **utils.py**, **melody_processing.py**, and **app.py**    
+
+In *utils.py*, replace both the melody_extraction and ConfidenceModel with a single model as shown
+
+```
+# Add your single model to utils.py
+
+class SingleMelodyConfidenceModel(Model):
+    def __init__(self):
+        super().__init__()
+        # Initialize your model layers
+        # ...
+        
+    def call(self, x):
+        # Your model implementation
+        # ...
+        
+        # IMPORTANT: Must return these three outputs
+        return melody_predictions, confidence_values
+        
+    def build_graph(self, raw_shape):
+        x = Input(shape=raw_shape)
+        return Model(inputs=[x], outputs=self.call(x))
+```
+
+In *app.py*, replace model initialization as shown
+
+```
+# Single Model Initialization
+
+model = ut.SingleMelodyConfidenceModel()
+model.build_graph([500, 513, 1])
+model.load_weights('./models/single_model/weights')
+```
 
 ## Citation
 If you use IMAT for annotating the polyphonic audios, please cite us
