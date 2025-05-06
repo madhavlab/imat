@@ -73,7 +73,7 @@ IMAT natively uses two separate models - one for melody estimation and another f
 
 The researchers need to follow the following steps to integrate the models:
 
-1. When using separate models - To integrate your custom melody and confidence estimation models:<br>
+1. **When using separate models** - To integrate your custom melody and confidence estimation models:<br>
    Replace the melody and confidence models in the **utils.py** file with your custom models as shown. 
 
    ```
@@ -116,7 +116,7 @@ The researchers need to follow the following steps to integrate the models:
 - Both models must maintain the expected input/output shapes for compatibility with IMAT's processing pipeline.
 - The pretrained weights of melody estimation model and confidence model should be present in the directory ```/models/pre/``` and ```/models/conf/``` respectively.
 
-2. When using a single model - To integrate a single model that predicts both melody and confidence:<br>
+2. **When using a single model** - To integrate a single model that predicts both melody and confidence:<br>
 Need to make changes in the **utils.py**, **melody_processing.py**, and **app.py**    
 
 In *utils.py*, replace both the melody_extraction and ConfidenceModel with a single model as shown
