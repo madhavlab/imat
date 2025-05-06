@@ -51,7 +51,7 @@ IMAT is developed using the Python FLASK framework for the back-end with the fro
 ## Pre-processing Module
 The uploaded audio is converted to a spectrogram which serves as input to our model archiecture. The base model $f_{[\theta,\phi]}$ consists of two components: feature extraction layers parameterized by $\theta$ and classification layer parameterized by $\phi$. 
 
-Additionally, a confidence model $f_{psi}$ is built on top of the feature extraction layers of the base model. This confidence estimation is crucial for the active learning component, allowing the system to identify which predictions require user verification. 
+Additionally, a confidence model $f_{\psi}$ is built on top of the feature extraction layers of the base model. This confidence estimation is crucial for the active learning component, allowing the system to identify which predictions require user verification. 
 
 ## Annotation Module
 After obtaining the melody estimates and confidence values, the system highlights low-confidence time frames in the visualization interface. Users can focus on these highlighted sections and make corrections through an intuitive interface. Using meta-learning, the system then adapts both the base model $f_{[\theta,\phi]}$ and confidence model $f_{\psi}$ based on these corrections, immediately updating melody estimates and confidence values across the entire spectrogram. This approach only requires correcting a small subset of frames, as the system generalizes these corrections to similar contexts throughout the audio, optimizing both annotation accuracy and efficiency.
