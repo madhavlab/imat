@@ -61,9 +61,10 @@ The workflow of the tool is depicted in Figure 1.
 ![Figure 1: Step-wise annotation process for a single audio using IMAT.](figures/interface.jpg)
 Figure 1. IMAT Interface: (a) user uploads any .wav audio file, (b) user visualizes the uploaded audio waveform, (c) user visualizes the corresponding spectrogram overlayed with estimated melody and zooms into a particular time range, (d) user corrects the incorrect melody anchor points corresponding to low confidence frames by manual annotation (in that time range).
 
-The README.md file of the [project repository](https://github.com/madhavlab/imat_taslp) consists of-
-- Detailed installation and usage instructions
-- Details of how different ML models can be integrated with IMAT.
+The installation and usage instructions are detailed in README.md file of the [project repository](https://github.com/madhavlab/imat_taslp)
+
+<!-- - Detailed installation and usage instructions
+- Details of how different ML models can be integrated with IMAT. -->
 
 ## How to integrate different ML models?
 IMAT natively uses two separate models - one for melody estimation and another for confidence. Researchers may use either of the following approaches:
@@ -113,6 +114,7 @@ The researchers need to follow the following steps to integrate the models:
 - The melody estimation model must return both predictions and intermediate features.
 - The confidence model should take the melody model as input and use its features to predict the confidence values.
 - Both models must maintain the expected input/output shapes for compatibility with IMAT's processing pipeline.
+- The pretrained weights of melody estimation model and confidence model should be present in the directory ```/models/pre/``` and ```/models/conf/``` respectively.
 
 2. When using a single model - To integrate a single model that predicts both melody and confidence:<br>
 Need to make changes in the **utils.py**, **melody_processing.py**, and **app.py**    
@@ -186,7 +188,10 @@ def conf_values(model, X):
     return conf
 ```
 
-
+**Important notes:**
+- The single model must return both melody predictions and corresponding confidence.
+- The single model must maintain the expected input/output shapes for compatibility with IMAT's processing pipeline.
+- The pretrained weights of the model should be present in the directory ```/models/single_model/```.
 
 # Acknowledgements
 
