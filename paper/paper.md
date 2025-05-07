@@ -31,11 +31,13 @@ Existing annotation tools fall into two main categories:
 - For polyphonic audios (like [Sonic Visualizer](https://www.sonicvisualiser.org/) with MELODIA[`(melodia)`](https://ieeexplore.ieee.org/document/6155601))
 
 A point to note is that both the tools use signal processing algorithms for estimating melody. However, these tools have significant limitations:
+
 1. Both the tools require extensive manual annotation, which is time consuming and labor-intensive.
 2. They lack uncertainty estimation capabilities to identify regions most likely needing correction and hence do not adapt to the user corrections.
 3. Both the tools exhibit strong coupling between their interfaces and underlying algorithms, lacking the modular architecture necessary to integrate alternative approaches without extensive code modifications. 
 
 IMAT addresses these limitations by:
+
 1. **Adaptive Annotation:** The tool learns from user corrections using meta-learning, improving overall accuracy by reducing manual effort.
 2. **Uncertainty Estimation:** Active-learning identifies low-confidence frames requiring user attention, optimzing the annotation workflow.
 3. **Model-agnostic Approach:** IMAT implements a flexible, model-agnostic framework compatible with any machine learning model that treats melody estimations as a multi-class classification problem with uncertainty estimation capabilities. This plugin architecture seemleassly integrate custom models without modifying the underlying codebase. 
