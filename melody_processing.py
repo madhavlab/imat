@@ -4,6 +4,7 @@ import mir_eval
 import tensorflow as tf
 import os
 import utils as ut
+import csv
 
 
 def get_spectrogram_json(y, sr):
@@ -181,7 +182,7 @@ def calc_rpa(efv, filename, indexes, groundtruth_dir='./static/groundtruth/'):
     RCA_full = mir_eval.melody.raw_chroma_accuracy(ref_v, ref_c, est_v, est_c)
     OA_full = mir_eval.melody.overall_accuracy(ref_v, ref_c, est_v, est_c)
     
-    return gfv
+    return RPA_full, RCA_full, OA_full
 
 
 
@@ -199,6 +200,7 @@ def support_pretrain_step(x, y, ts, meta_model_pre, inner_optimizer, inner_step)
             grads = tape.gradient(loss, meta_model_pre.trainable_variables)
             inner_optimizer.apply_gradients(zip(grads, meta_model_pre.trainable_variables))
     print("Melody extraction model training complete.")
+    print('\n')
     return loss
 
 def support_conftrain_step(x, y, ts, meta_model_pre, meta_model_conf, conf_inner_optimizer, inner_step):
@@ -219,6 +221,7 @@ def support_conftrain_step(x, y, ts, meta_model_pre, meta_model_conf, conf_inner
             grads = tape.gradient(loss, meta_model_conf.trainable_variables)
             conf_inner_optimizer.apply_gradients(zip(grads, meta_model_conf.trainable_variables))    
     print("Confidence model training complete.")
+    print('\n')
     return loss
 
 
@@ -234,7 +237,7 @@ def aml(S, active_frames, gfv, fileid, model, model_conf, weights_path='models/u
     inner_optimizer = tf.keras.optimizers.Adam(learning_rate=alpha)
     conf_inner_optimizer = tf.keras.optimizers.Adam(learning_rate=beta)
 
-    inner_step = 5
+    inner_step = 10
     
     # Prepare data
     S = S.T
