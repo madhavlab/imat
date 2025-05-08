@@ -47,11 +47,11 @@ IMAT addresses these limitations by:
 ## Architecture Overview
 IMAT is developed using the Python FLASK framework for the back-end with the front-end components built using JavaScript, HTML, and CSS. The tool can operate efficiently on a CPU and does not necessitate the use of a GPU. It provides a user-friendly interface for loading audio files, visualizing the spectrogram, and performing adaptive annotation. The tool consists of the following main components: 
 
-1. Pre-processing Module: Converts the uploaded audio files (.wav) into spectrogram (of shape $F\times T$, $F$ are the number of frequnecy bins and $T$ are the number of time frames) and extracts initial melody estimates with the uncertainty estimates using the *pluggable* machine learning model.
+1. Pre-processing Module: Converts the uploaded audio files (.wav) into a spectrogram (of shape $F\times T$, $F$ are the number of frequency bins, and $T$ are the number of time frames) and extracts initial melody estimates with the uncertainty estimates using the *pluggable* machine learning model.
 2. Annotation Module: Identifies low-confidence frames that require user annotation and adapts the melody estimation model based on user corrections.
 
 ## Pre-processing Module
-The uploaded audio is converted to a spectrogram which serves as input to our model archiecture. The base model $f_{[\theta,\phi]}$ consists of two components: feature extraction layers parameterized by $\theta$ and classification layer parameterized by $\phi$. 
+The uploaded audio is converted to a spectrogram, which is input to our model architecture. The base model $f_{[\theta,\phi]}$ consists of two components: feature extraction layers parameterized by $\theta$ and classification layer parameterized by $\phi$. 
 
 Additionally, a confidence model $f_{\psi}$ is built on top of the feature extraction layers of the base model. This confidence estimation is crucial for the active learning component, allowing the system to identify which predictions require user verification. 
 
@@ -64,7 +64,7 @@ The workflow of the tool is depicted in Figure 1.
 ![Figure 1: Step-wise annotation process for a single audio using IMAT.](figures/interface1.jpg){width=100% fig.align="center"}
 Figure 1. IMAT Interface: (a) user uploads any .wav audio file, (b) user visualizes the uploaded audio waveform, (c) user visualizes the corresponding spectrogram overlayed with estimated melody and zooms into a particular time range, (d) user corrects the incorrect melody anchor points corresponding to low confidence frames by manual annotation (in that time range).
 
-The installation and usage instructions are detailed in README.md file of the [project repository](https://github.com/madhavlab/imat_taslp)
+The installation and usage instructions are detailed in the README.md file of the [project repository](https://github.com/madhavlab/imat_taslp)
 
 <!-- - Detailed installation and usage instructions
 - Details of how different ML models can be integrated with IMAT. -->
@@ -118,12 +118,12 @@ The researchers need to follow the following steps to integrate the models:
 - The melody estimation model must return both predictions and intermediate features.
 - The confidence model should take the melody model as input and use its features to predict the confidence values.
 - Both models must maintain the expected input/output shapes for compatibility with IMAT's processing pipeline.
-- The pretrained weights of melody estimation model and confidence model should be present in the directory ```/models/pre/``` and ```/models/conf/``` respectively.
+- The pre-trained weights of melody estimation model and confidence model should be present in the directory ```/models/pre/``` and ```/models/conf/``` respectively.
 
 2. **When using a single model** - To integrate a single model that predicts both melody and confidence:<br>
 Need to make changes in the **utils.py**, **melody_processing.py**, and **app.py**    
 
-In *utils.py*, replace both the melody_extraction and ConfidenceModel with a single model as shown
+In *utils.py*, replace both the melody_extraction and ConfidenceModel with a single model, as shown.
 
 ```
 # Add your single model to utils.py
