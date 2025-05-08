@@ -253,7 +253,7 @@ button:hover {
 } */
 
 
-/* .chart-container {
+.chart-container {
     background-color: aqua;
     position: relative;
     top: -520px;
@@ -261,7 +261,7 @@ button:hover {
     width: 1440px;
     height: 460px;
     
-} */
+}
 
 #overlay-canvas {
     position: absolute;    
@@ -278,13 +278,13 @@ button:hover {
     z-index: 10;
 } */
 
-/* .confidence-bar {
+.confidence-bar {
     position: relative;
     width: 1392px;
     left: 78px;
     top: 550px;
     z-index: 10;
-} */
+}
 
 
 #js-confidence-bar {
