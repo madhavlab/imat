@@ -39,13 +39,13 @@ A point to note is that both tools use signal processing algorithms for estimati
 IMAT addresses these limitations by:
 
 1. **Adaptive Annotation:** The tool learns from user corrections using meta-learning, improving overall accuracy by reducing manual effort.
-2. **Uncertainty Estimation:** Active-learning identifies low-confidence frames requiring user attention, optimzing the annotation workflow.
-3. **Model-agnostic Approach:** IMAT implements a flexible, model-agnostic framework compatible with any machine learning model that treats melody estimations as a multi-class classification problem with uncertainty estimation capabilities. This plugin architecture seemleassly integrate custom models without modifying the underlying codebase. 
+2. **Uncertainty Estimation:** Active learning identifies low-confidence frames requiring user attention, optimizing the annotation workflow.
+3. **Model-agnostic Approach:** IMAT implements a flexible, model-agnostic framework compatible with any machine learning model that treats melody estimations as a multi-class classification problem with uncertainty estimation capabilities. This plugin architecture seamlessly integrates custom models without modifying the underlying codebase.
 
 
 # Software Description
 ## Architecture Overview
-IMAT is developed using the Python FLASK framework for the back-end with the front-end components built using JavaScript, HTML, and CSS. The tool can operate efficiently on a CPU and does not necessitate the use of a GPU. It provides a user-friendly interface for loading audio file, visualizing the spectrogram, and perform adaptive annotation. The tool consists of the following main components: 
+IMAT is developed using the Python FLASK framework for the back-end with the front-end components built using JavaScript, HTML, and CSS. The tool can operate efficiently on a CPU and does not necessitate the use of a GPU. It provides a user-friendly interface for loading audio files, visualizing the spectrogram, and performing adaptive annotation. The tool consists of the following main components: 
 
 1. Pre-processing Module: Converts the uploaded audio files (.wav) into spectrogram (of shape $F\times T$, $F$ are the number of frequnecy bins and $T$ are the number of time frames) and extracts initial melody estimates with the uncertainty estimates using the *pluggable* machine learning model.
 2. Annotation Module: Identifies low-confidence frames that require user annotation and adapts the melody estimation model based on user corrections.
