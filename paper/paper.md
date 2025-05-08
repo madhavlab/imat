@@ -60,8 +60,12 @@ After obtaining the melody estimates and confidence values, the system highlight
 
 
 The workflow of the tool is depicted in Figure 1. 
-![Figure 1: Step-wise annotation process for a single audio using IMAT.](figures/interface1.jpg){width=50%}
-Figure 1. IMAT Interface: (a) user uploads any .wav audio file, (b) user visualizes the uploaded audio waveform, (c) user visualizes the corresponding spectrogram overlayed with estimated melody and zooms into a particular time range, (d) user corrects the incorrect melody anchor points corresponding to low confidence frames by manual annotation (in that time range).
+<figure style="text-align:center">
+  <img src="figures/interface1.jpg" alt="Step-wise annotation process for a single audio using IMAT" width="50%"/>
+  <figcaption>Figure 1. IMAT Interface: (a) user uploads any .wav audio file, (b) user visualizes the uploaded audio waveform, (c) user visualizes the corresponding spectrogram overlayed with estimated melody and zooms into a particular time range, (d) user corrects the incorrect melody anchor points corresponding to low confidence frames by manual annotation (in that time range).</figcaption>
+</figure>
+<!-- ![Figure 1: Step-wise annotation process for a single audio using IMAT.](figures/interface1.jpg){width=50%}
+Figure 1. IMAT Interface: (a) user uploads any .wav audio file, (b) user visualizes the uploaded audio waveform, (c) user visualizes the corresponding spectrogram overlayed with estimated melody and zooms into a particular time range, (d) user corrects the incorrect melody anchor points corresponding to low confidence frames by manual annotation (in that time range). -->
 
 The installation and usage instructions are detailed in README.md file of the [project repository](https://github.com/madhavlab/imat_taslp)
 
