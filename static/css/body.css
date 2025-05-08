@@ -6,7 +6,6 @@
     margin-left: 50px;
     margin-right: 100px;
     height: 500px;
-    /* background-color: blue; */
     margin-bottom: 30px;
 }
 
@@ -18,12 +17,9 @@
     width: 500px;
     align-content: center;
     margin-left: 150px;
-    /* background-color: yellow; */
-
 }
 
 .first-content {
-    /* background-color: pink; */
     display: flex;
     font-family: Roboto, Arial;
     font-size: 34px;
@@ -36,20 +32,17 @@
     display: flex;
     font-family: Roboto, Arial;
     font-size: 24px;
-    /* color: gray; */
     color: darkgreen;
     font-weight: 50;
 }
 
 .third-content {
-    /* background-color: lightblue; */
     display: flex;
     flex-direction: column;
     width: 250px;
 }
 
 .third-content-button {
-    /* background-color: rgb(3, 3, 106); */
     height: 30px;
     color: black;
     border-radius: 10px;
@@ -66,7 +59,6 @@
 }
 
 .third-end-content {
-    /* background-color: pink; */
     display: flex;
     font-family: Roboto, Arial;
     font-size: 14px;
@@ -99,27 +91,22 @@ to { transform: rotate(360deg); }
   }
 
 .display-browsed-audio{
-    /* background-color: pink; */
     width: 90%;
     margin-left: 65px;
     margin-right: auto auto;
-    /* margin: 200px auto; */
     margin-top: 0;
 }
 
 .time-domain-audio {
-    /* background-color: blue; */
     margin-left: 123px;
     margin-right: 117px;
     border-width: 2px;    
 }
 
 .js-label{
-    /* background-color: blue; */
     display: flex;
     flex-direction: column;
     height: 50px;
-    /* height: 100px; */
     justify-content: space-between;
     align-items: center;
 }
@@ -130,21 +117,17 @@ to { transform: rotate(360deg); }
 }
 
 .vol-zoom-playback{
-    /* background-color: pink; */
     display: flex;
     flex-direction: row;
     width: 60%;
     justify-content: space-between;
-    /* font-size: 24px; */
 }
 
 .zoom-label{
-    /* background-color: orange; */
     justify-content: center;
 }
 
 .audio-controls {
-    /* background-color: blue; */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -168,7 +151,6 @@ button:hover {
 }
 
 .spectrogram {
-    /* background-color: lightblue; */
     display: flex;
     margin-top: 30px;
     margin-bottom: 10px;
@@ -182,12 +164,10 @@ button:hover {
     padding-left: 20px;
     padding-right: 20px;
     font-family: Roboto, Arial;
-    /* font-size: 18px; */
     font-size: 24px;
 }
 
 .d-spectrogram {
-    /* background-color: blue; */
     width: 90%;
     margin-left: 65px;
     margin-right: auto auto;
@@ -195,7 +175,6 @@ button:hover {
 
 
 .show-melody-annotate {
-    /* background-color: brown; */
     display: flex;
     flex-direction: row;
     margin-top: 20px;
@@ -203,14 +182,12 @@ button:hover {
 }
 
 .show-melody {
-    /* background-color: yellow; */
     font-family: Roboto, Arial;
     margin-left: 120px;
     font-size: 24px;
 }
 
 .annotate {
-    /* background-color: lightblue; */
     width: 100px;
     justify-content: right;
 }
@@ -219,16 +196,13 @@ button:hover {
     padding-left: 20px;
     padding-right: 20px;
     font-family: Roboto, Arial;
-    /* font-size: 18px; */
     font-size: 24px;
     margin-left: 50px;
 }
 
 .download {
-    /* background-color: pink; */
     justify-content: center;
     margin-right: 120px;
-    /* width: 250px; */
     
 }
 
@@ -237,21 +211,16 @@ button:hover {
     padding-right: 20px;
     width: 250px;
     font-family: Roboto, Arial;
-    /* font-size: 18px; */
     font-size: 24px;
-    /* width: 180px; */
 }
 
 .display-spectrogram {
-    /* background-color: pink; */
     padding-left: 50px;
     height: 600px;
     
 }
 
 .display-zoom-spectrogram-melody {
-    /* background-color: black; */
-    /* height: 605px; */
     height: 620px;
     position: relative;
     width: 90%;
@@ -261,12 +230,11 @@ button:hover {
 
 .spec-container {
     position: relative;
-    background-color: yellow;
-    z-index: 2;
     height: 600px;
-    /* width: 1650px; */
     width: 94%;
-    padding-left: 50px;    
+    padding-left: 50px;
+    
+    
 }
 
 .zoom-spectrogram-melody {
@@ -320,13 +288,11 @@ button:hover {
 
 
 #js-confidence-bar {
-    /* width: 100%; */
     height: 20px;
 }
 
 
 .play-remove-retrain-btn {
-    /* background-color: yellow; */
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -337,34 +303,27 @@ button:hover {
 }
 
 .play-button {
-    /* background-color: pink; */
     padding-left: 20px;
     padding-right: 20px;
     font-family: Roboto, Arial;
-    /* font-size: 18px; */
     font-size: 24px;
 }
 
 .remove-button {
-    /* background-color: lightblue; */
     padding-left: 20px;
     padding-right: 20px;
     font-family: Roboto, Arial;
-    /* font-size: 18px; */
     font-size: 24px;
 }
 
 .retrain-button {
-    /* background-color: gray; */
     padding-left: 20px;
     padding-right: 20px;
     font-family: Roboto, Arial;
-    /* font-size: 18px; */
     font-size: 24px;
 }
 
 .original-resynth-toggle-buttons {
-    /* background-color: red; */
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -399,21 +358,18 @@ button:hover {
 }
 
 .team{
-    /* background-color: pink; */
     display: flex;
     flex-direction: column;
     margin-top: 500px;
 }
 
 .authors {
-    /* background-color: blue; */
     display: flex;
     font-style: Roboto, Arial;
     font-size: 18px;
 }
 
 .affiliation {
-    /* background-color: red; */
     display: flex;
     font-style: Roboto, Arial;
     margin-left: 18px;
@@ -421,7 +377,6 @@ button:hover {
 }
 
 .contact {
-    /* background-color: red; */
     display: flex;
     font-style: Roboto, Arial;
     margin-left: 18px;
