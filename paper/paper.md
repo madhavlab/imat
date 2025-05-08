@@ -71,6 +71,7 @@ The installation and usage instructions are detailed in README.md file of the [p
 
 ## How to integrate different ML models?
 IMAT natively uses two separate models - one for melody estimation and another for confidence. Researchers may use either of the following approaches:
+
 1. Separate Models Approach - Same architecture but with different melody estimation and confidence models. 
 2. Single Model Approach - A single model that predicts both melody estimates and corresponding confidence. 
 
@@ -192,6 +193,7 @@ def conf_values(model, X):
 ```
 
 **Important notes:**
+
 - The single model must return both melody predictions and corresponding confidence.
 - The single model must maintain the expected input/output shapes for compatibility with IMAT's processing pipeline.
 - The pretrained weights of the model should be present in the directory ```/models/single_model/```.
