@@ -3,8 +3,6 @@
 ## Overview
 IMAT is a tool designed that uses our previously proposed model-agnostic machine-learning-based algorithm, i.e., active-meta-learning, that combines active-learning and meta-learning to efficiently annotate the singing melody obtained from machine learning-based melody estimation algorithms. The tool uses active learning to highlight a few regions in the audio using a confidence criterion to be corrected by the user via visual and auditory feedback. It subsequently adapts to these corrections using meta-learning, thus providing a more precise melody annotation of the entire audio, thereby expediting the correction process.
 
-```This tool is tested only on **Linux**, and not on Windows and Mac.```
-
 ## Usage
 How to setup the tool?
 
