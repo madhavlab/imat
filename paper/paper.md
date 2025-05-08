@@ -200,6 +200,6 @@ def conf_values(model, X):
 
 # Acknowledgements
 
-We acknowledge contributions from Saransh Shivhare during the development of this tool.
+We acknowledge contributions from Saransh Shivhare during the development of this tool. This work is supported by Prasar Bharti, India's public broadcasting agency. 
 
 # References
