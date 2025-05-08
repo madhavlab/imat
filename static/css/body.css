@@ -261,14 +261,12 @@ button:hover {
 
 .spec-container {
     position: relative;
-    /* background-color: yellow; */
-    /* z-index: 2; */
+    background-color: yellow;
+    z-index: 2;
     height: 600px;
     /* width: 1650px; */
     width: 94%;
-    padding-left: 50px;
-    
-    
+    padding-left: 50px;    
 }
 
 .zoom-spectrogram-melody {
@@ -277,7 +275,6 @@ button:hover {
     height: 100%;
     z-index: 1;
 }
-
 
 /* .chart-container {
     position: relative;
@@ -288,15 +285,15 @@ button:hover {
 } */
 
 
-.chart-container {
+/* .chart-container {
+    background-color: aqua;
     position: relative;
     top: -520px;
     left: 87px;
     width: 1440px;
     height: 460px;
     
-}
-
+} */
 
 #overlay-canvas {
     position: absolute;    
@@ -304,7 +301,6 @@ button:hover {
     width: 100%;
     z-index: 2;
 }
-
 
 /* .confidence-bar {
     position: relative;
@@ -314,14 +310,13 @@ button:hover {
     z-index: 10;
 } */
 
-.confidence-bar {
+/* .confidence-bar {
     position: relative;
     width: 1392px;
     left: 78px;
     top: 550px;
     z-index: 10;
-}
-
+} */
 
 
 #js-confidence-bar {
