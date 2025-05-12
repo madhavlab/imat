@@ -423,6 +423,7 @@ function updateChart(xValuesRange,filteredYValues) {
             data: chartData,
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 scales: {
                     xAxes: [{
                     display: true,
@@ -840,7 +841,7 @@ function plotSpectrogram(data) {
                 hovermode: null,  
                 }
             const zoom_trace = [trace];                    
-            const config = {responsive: false};
+            const config = {responsive: true};
 
             Plotly.newPlot('js-display-zoom-spectrogram-melody', zoom_trace, layout1, config)   
             hideSpinner("") 
