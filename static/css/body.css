@@ -226,8 +226,8 @@ button:hover {
 .display-zoom-spectrogram-melody {
     height: 620px;
     position: relative;
-    width: 90%;
-    margin-left: 3.5%;
+    width: 88%;
+    margin-left: 5.5%;
     margin-right: auto auto;
     z-index: 2;
 }
@@ -237,7 +237,6 @@ button:hover {
     position: absolute;
     height: 100%;
     width: 100%;
-    /* padding-left: 50px;  */
 }
 
 
@@ -263,7 +262,6 @@ button:hover {
 
 
 .confidence-bar {
-    background-color: black;
     position: relative;
     width: 88%;
     left: 5%;
