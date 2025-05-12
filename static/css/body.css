@@ -19,6 +19,7 @@
     margin-left: 150px;
 }
 
+
 .first-content {
     display: flex;
     font-family: Roboto, Arial;
@@ -73,7 +74,7 @@
     border-top-color: #130b3d;
     border-radius: 50%;
     animation: spin 1s infinite linear;
-  }
+}
   
 @keyframes spin {
 from { transform: rotate(0deg); }
@@ -88,11 +89,12 @@ to { transform: rotate(360deg); }
     align-items: center;
     margin: 0 auto;
     z-index: 9999;
-  }
+}
+
 
 .display-browsed-audio{
     width: 90%;
-    margin-left: 65px;
+    margin-left: 3.5%;
     margin-right: auto auto;
     margin-top: 0;
 }
@@ -150,12 +152,13 @@ button:hover {
     background-color: darkslategray;
 }
 
+
 .spectrogram {
     display: flex;
     margin-top: 30px;
     margin-bottom: 10px;
     width: 90%;
-    margin-left: 65px;
+    margin-left: 3.5%;
     margin-right: auto auto;
     justify-content: center;
 }
@@ -169,10 +172,9 @@ button:hover {
 
 .d-spectrogram {
     width: 90%;
-    margin-left: 65px;
+    margin-left: 3.5%;
     margin-right: auto auto;
 }
-
 
 .show-melody-annotate {
     display: flex;
@@ -214,8 +216,9 @@ button:hover {
     font-size: 24px;
 }
 
+
 .display-spectrogram {
-    padding-left: 50px;
+    padding-left: 2%;
     height: 600px;
     
 }
@@ -224,65 +227,47 @@ button:hover {
     height: 620px;
     position: relative;
     width: 90%;
-    margin-left: 65px;
+    margin-left: 3.5%;
     margin-right: auto auto;
+    z-index: 2;
 }
 
+
 .spec-container {
-    position: relative;
-    height: 600px;
-    width: 94%;
-    padding-left: 50px; 
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    /* padding-left: 50px;  */
 }
+
 
 .zoom-spectrogram-melody {
     position: absolute;
     width: 100%;
     height: 100%;
-    z-index: 1;
 }
-
-
-/* .chart-container {
-    position: relative;
-    top: -520px;
-    left: 87px;
-    width: 1503px;
-    height: 460px;
-} */
 
 .chart-container {
     position: relative;
-    top: -520px;
-    left: 87px;
-    width: 1440px;
-    height: 460px;
-    
+    top: 11%;
+    left: 2.4%; 
+    width: 91%;
+    height: 81%;
 }
-
 
 #overlay-canvas {
-    position: absolute;    
     height: 100%;
     width: 100%;
-    z-index: 2;
 }
 
 
-/* .confidence-bar {
-    position: relative;
-    width: 1452px;
-    left: 78px;
-    top: 550px;
-    z-index: 10;
-} */
 
 .confidence-bar {
+    background-color: black;
     position: relative;
-    width: 1392px;
-    left: 78px;
-    top: 550px;
-    z-index: 10;
+    width: 88%;
+    left: 5%;
+    top: 93%;
 }
 
 
@@ -343,12 +328,6 @@ button:hover {
 #volumeSliderRe {
     margin-right: 50px;
 }
-
-
-
-
-
-
 
 
 
